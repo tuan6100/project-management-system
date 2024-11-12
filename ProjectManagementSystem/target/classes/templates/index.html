@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <!-- Embedded font and icon -->
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+            rel="stylesheet"
+        />
+
+        <link
+            href="https://fonts.googleapis.com/icon?family=Material+Icons"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+        />
+
+        <!-- Link css -->
+        <link rel="stylesheet" href="../static/css/reset.css" />
+        <link rel="stylesheet" href="../static/css/common.css" />
+        <link rel="stylesheet" href="../static/css/home_style.css" />
+
+        <!-- Link favicon -->
+        <link
+            rel="shortcut icon"
+            href="../static/favicon/favicon.png"
+            type="image/x-icon"
+        />
+
+        <title>Home</title>
+    </head>
+    <body>
+        <div class="container">
+            <nav class="navbar">
+                <div class="navbar-logo">
+                    <img src="../static/img/logo.png" alt="The project" />
+                </div>
+                <div class="navbar-search navbar-item">
+                    <span class="material-symbols-outlined navbar-item__icon">
+                        search
+                    </span>
+                    <div class="navbar-search__title navbar-item__title">
+                        Search
+                    </div>
+                </div>
+                <div class="navbar-pro navbar-item">
+                    <span class="material-symbols-outlined navbar-item__icon">
+                        token
+                    </span>
+                    <div class="navbar-pro__title navbar-item__title">
+                        Project
+                    </div>
+                </div>
+                <div class="navbar-report navbar-item">
+                    <span class="material-symbols-outlined navbar-item__icon">
+                        summarize
+                    </span>
+                    <div class="navbar-report__title navbar-item__title">
+                        Report
+                    </div>
+                </div>
+            </nav>
+            <div class="prolist">
+                <div class="prolist-head">
+                    <h2 class="prolist-head__title">Projects</h2>
+                    <div class="prolist-func">
+                        <div class="prolist-func__more">
+                            <span class="material-symbols-outlined">
+                                more_horiz
+                            </span>
+                        </div>
+                        <div class="prolist-func__add">
+                            <span class="material-symbols-outlined"> add </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="prolis-filter">
+                    <div class="prolist-filter__icon">
+                        <span class="material-symbols-outlined">
+                            filter_list
+                            </span>
+                    </div>
+                    <input type="text" placeholder="Filter project" class="prolist-filter__input"/>
+                </div>
+                
+                <div class="prolist-list">
+                    <h3 class="prolist-list__title">MY PROJECT</h3>
+                    <ol class="prolist-ol"></ol>
+                </div>
+            </div>
+            <main class="hero">
+                <div class="hero-nav">
+                    <div class="hero-nav__btn">
+                        <span class="material-symbols-outlined">
+                            arrow_back
+                        </span>
+                    </div>
+                    <div class="hero-nav__func">
+                        <div class="hero-nav__add">
+                            <span class="material-symbols-outlined">
+                                add_task
+                            </span>
+                        </div>
+                        <div class="hero-nav__task">
+                            <span class="material-symbols-outlined">
+                                task
+                            </span>
+                        </div>
+                        <div class="hero-nav__noti">
+                            <span class="material-symbols-outlined">
+                                notifications
+                            </span>
+                        </div>
+                        <div class="hero-nav__avt">
+                            <span class="material-symbols-outlined">
+                                account_circle
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="hero-task"></div>
+            </main>
+        </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+        const toggleButton = document.querySelector(".hero-nav__btn");
+        const prolistList = document.querySelector(".prolist");
+        const icon = toggleButton.querySelector(".material-symbols-outlined");
+
+            toggleButton.addEventListener("click", () => {
+                prolistList.classList.toggle("active");
+
+                if (prolistList.classList.contains("active")) {
+                    icon.textContent = "arrow_back"; 
+                } else {
+                    icon.textContent = "arrow_forward"; 
+                }
+            });
+        });
+    </script>
+    </body>
+</html>
