@@ -2,7 +2,11 @@ package com.project.oop.PMS.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.List;
 import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "users")
@@ -20,13 +24,14 @@ public class User {
 
     // Projects managed by this user
     @OneToMany(mappedBy = "manager")
+    @JsonManagedReference
     private Set<Project> managedProjects;
 
     // Projects where this user is a member
     @ManyToMany(mappedBy = "members")
-    private Set<Project> memberProjects;
+    private List<Project> memberProjects;
 
     // Tasks where this user is a member
     @ManyToMany(mappedBy = "members")
-    private Set<Task> memberTasks;
+    private List<Task> memberTasks;
 }

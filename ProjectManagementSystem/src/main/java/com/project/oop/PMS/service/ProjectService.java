@@ -21,11 +21,13 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public List<Project> getAllProjects() {
+    public  List<Project> getAllProjects() {
         return projectRepository.findAll();
     }
 
-    public Optional<Project> updateProject(Long projectId, String name, String description, User user) {
+    
+    
+    public Optional<Project> updateProject(Integer projectId, String name, String description, User user) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isPresent()) {
             Project project = projectOpt.get();
@@ -41,7 +43,7 @@ public class ProjectService {
         return Optional.empty();
     }
     
-    public Optional<Project> getProjectById(Long projectId, User user) {
+    public Optional<Project> getProjectById(Integer projectId, User user) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isPresent()) {
             Project project = projectOpt.get();
@@ -58,10 +60,15 @@ public class ProjectService {
 
     public boolean deleteProjectByName(String projectName, User user) {
         Optional<Project> projectOpt = projectRepository.findByName(projectName);
-        if (projectOpt.isPresent() && projectOpt.get().getManager().getUserID().equals(user.getUserID())) {
-            projectRepository.deleteByName(projectName);
-            return true;
+        if (projectOpt.isPresent()) {
+            Project project = projectOpt.get();
+            // Kiểm tra nếu user là manager của project
+            if (project.getManager().getUserID().equals(user.getUserID())) {
+                projectRepository.delete(project);
+                return true;
+            }
         }
         return false;
     }
+
 }

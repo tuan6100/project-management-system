@@ -24,8 +24,8 @@ function login(event) {
     })
     .then((data) => {
       // Lưu ID vào localStorage
-      localStorage.setItem("userId", data.data.id);
-      localStorage.setItem("username", data.data.username);
+      sessionStorage.setItem("userId", data.data.id);
+      sessionStorage.setItem("username", data.data.username);
 
       // Hiển thị thông báo thành công
       Toastify({

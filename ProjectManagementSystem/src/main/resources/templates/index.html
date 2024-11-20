@@ -33,6 +33,9 @@
             type="image/x-icon"
         />
 
+        <!-- toastify -->
+        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
         <title>Home</title>
     </head>
     <body>
@@ -91,7 +94,25 @@
                 
                 <div class="prolist-list">
                     <h3 class="prolist-list__title">MY PROJECT</h3>
-                    <ol class="prolist-ol"></ol>
+                    <ol class="prolist-ol" id="project-list">
+                        <li class="prolist-item">
+                            <p class="prolist-item__name">Test project</p>
+                            <div class="prolist-item__remove">
+                                <span class="material-symbols-outlined">
+                                    delete
+                                    </span>
+                            </div>
+                        </li>
+
+                        <li class="prolist-item">
+                            <p class="prolist-item__name">T project</p>
+                            <div class="prolist-item__remove">
+                                <span class="material-symbols-outlined">
+                                    delete
+                                    </span>
+                            </div>
+                        </li>
+                    </ol>  
                 </div>
             </div>
             <main class="hero">
@@ -140,7 +161,7 @@
                 <label for="popup_create_project-desc">Description:</label>
                 <textarea id="popup_create_project-desc" name="projectDesc" placeholder=""></textarea>
     
-                <button type="submit">Add Project</button>
+                <button type="submit" id="buttonCreateProject">Add Project</button>
             </form>
         </div>
     </div>
@@ -162,7 +183,31 @@
                 }
             });
         });
+
+        //Sort project by name 
+        document.addEventListener("DOMContentLoaded", () => {
+            const searchInput = document.querySelector(".prolist-filter__input");
+            const projectList = document.querySelector("#project-list");
+            const projects = projectList.querySelectorAll(".prolist-item");
+
+            searchInput.addEventListener("input", () => {
+                const searchTerm = searchInput.value.toLowerCase();
+
+                projects.forEach(project => {
+                    const projectName = project.querySelector(".prolist-item__name").textContent.toLowerCase();
+                    
+                    // Kiểm tra xem tên dự án có bắt đầu bằng từ tìm kiếm hay không
+                    if (projectName.startsWith(searchTerm)) {
+                        project.style.display = "flex"; // Hiển thị dự án
+                    } else {
+                        project.style.display = "none"; // Ẩn dự án
+                    }
+                });
+            });
+        });
+
     </script>
-    <script src="/js/home.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="/js/main_page.js"></script>
     </body>
 </html>

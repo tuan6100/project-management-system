@@ -1,5 +1,6 @@
 package com.project.oop.PMS.controller;
 
+import com.project.oop.PMS.dto.ProjectResponse;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.service.ProjectService;
@@ -26,7 +27,7 @@ public class ProjectController {
     private UserService userService;
 
     // Thêm project
-    @PostMapping
+    @PostMapping("/add")
     public ResponseEntity<?> addProject(@RequestBody Map<String, String> request) {
         String name = request.get("name");
         String description = request.get("description");
@@ -49,15 +50,14 @@ public class ProjectController {
     }
 
     // Xem danh sách project
-    @GetMapping
-    public ResponseEntity<?> getAllProjects() {
-        List<Project> projects = projectService.getAllProjects();
-        return ResponseEntity.ok(Map.of("projects", projects));
+    @GetMapping("/get/{memberId}")
+    public ResponseEntity<List<ProjectResponse>> getAllProjectsByUserId(@PathVariable int memberId) {
+        List<ProjectResponse> projects = userService.getAllProjectsByUserId(memberId);
+        return ResponseEntity.ok(projects);
     }
-    
  // Truy cập vào project
     @GetMapping("/{projectId}")
-    public ResponseEntity<?> getProjectById(@PathVariable Long projectId, @RequestParam Integer userId) {
+    public ResponseEntity<?> getProjectById(@PathVariable Integer projectId, @RequestParam Integer userId) {
         Optional<User> userOpt = userService.findUserById(userId);
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(404).body(Map.of("message", "User not found"));
