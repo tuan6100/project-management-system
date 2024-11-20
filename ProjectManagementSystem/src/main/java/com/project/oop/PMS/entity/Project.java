@@ -3,11 +3,12 @@ package com.project.oop.PMS.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
@@ -16,9 +17,10 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Integer projectId;
 
     private String name;
+
     private String description;
 
     // Relationship with resources (each project can have multiple resources)
@@ -34,13 +36,17 @@ public class Project {
     private User manager; 
 
     // Relationship for members of the project
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "member_project",
-        joinColumns = @JoinColumn(name = "project_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+        joinColumns = @JoinColumn(name = "projectId"),
+        inverseJoinColumns = @JoinColumn(name = "userId")
     )
-    private List<User> members;
+    private List<User> members = new ArrayList<>();
+
+    @OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    private Set<Task> tasks;
+
 
     // Constructors
     public Project() {}

@@ -9,13 +9,13 @@ public class Comment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer commentID;
+    private Integer commentId;
 
     @ManyToOne
-    @JoinColumn(name = "task_id", referencedColumnName = "taskID", nullable = false)
+    @JoinColumn(name = "task_id", referencedColumnName = "taskId", nullable = false)
     private Task task;
 
-    @Column(name = "createDate")
+    @Column(name = "create_date")
     private Date createDate;
 
     @Column(name = "author")

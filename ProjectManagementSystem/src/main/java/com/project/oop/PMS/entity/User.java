@@ -3,10 +3,12 @@ package com.project.oop.PMS.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.ToString;
 
 @Entity
 @Table(name = "users")
@@ -14,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userID;
+    private Integer userId;
 
     @Column(name = "username", nullable = false, unique = true)
     private String username;
@@ -25,13 +27,13 @@ public class User {
     // Projects managed by this user
     @OneToMany(mappedBy = "manager")
     @JsonManagedReference
-    private Set<Project> managerProjects;
+    private List<Project> managerProjects;
 
-    // Projects where this user is a member
     @ManyToMany(mappedBy = "members")
-    private List<Project> memberProjects;
+    @ToString.Exclude
+    private List<Project> memberProjects = new ArrayList<>();
 
     // Tasks where this user is a member
     @ManyToMany(mappedBy = "members")
-    private List<Task> memberTasks;
+    private Set<Task> memberTasks;
 }

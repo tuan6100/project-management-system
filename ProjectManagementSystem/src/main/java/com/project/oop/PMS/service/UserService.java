@@ -3,23 +3,25 @@ package com.project.oop.PMS.service;
 import com.project.oop.PMS.dto.ProjectResponse;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.User;
-import com.project.oop.PMS.repository.ProjectRepository;
 import com.project.oop.PMS.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
-    private ProjectRepository projectRepository;
+    @Lazy
+    private ProjectService projectService;
     
     public User registerUser(String username, String password) {
         // Kiểm tra trùng lặp username
@@ -42,14 +44,20 @@ public class UserService {
         return Optional.empty();
     }
 
-    public User findUserById(Integer userId) {
+    public User getUserById(Integer userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public Project getProject(Integer projectId, Integer userId) throws RuntimeException{
+        return getUserById(userId).getMemberProjects().stream()
+                .filter(project -> project.getProjectId().equals(projectId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Project not found"));
+    }
 
-    public List<ProjectResponse> getAllProjectsByUser(Integer userID) throws Exception{
-        User user = findUserById(userID);
+    public List<ProjectResponse> getAllProjectsByUser(Integer userID) throws RuntimeException{
+        User user = getUserById(userID);
         List<Project> projects = user.getMemberProjects();
         List<ProjectResponse> projectReponses = new ArrayList<>();
         projects.forEach(project -> {

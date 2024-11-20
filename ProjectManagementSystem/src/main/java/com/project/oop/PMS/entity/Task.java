@@ -11,9 +11,12 @@ import java.util.Set;
 public class Task {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer taskID;
+    private Integer taskId;
 
-    private Integer projectID;
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "projectId")
+    private Project project;
+
     private String title;
 
     @Temporal(TemporalType.DATE)
@@ -27,8 +30,8 @@ public class Task {
     @ManyToMany
     @JoinTable(
         name = "member_task",
-        joinColumns = @JoinColumn(name = "task_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+        joinColumns = @JoinColumn(name = "taskId"),
+        inverseJoinColumns = @JoinColumn(name = "userId")
     )
     private Set<User> members;
 }

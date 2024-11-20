@@ -20,29 +20,29 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // Đăng ký người dùng
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
             User newUser = userService.registerUser(request.getUsername(), request.getPassword());
-            UserResponse userResponse = new UserResponse(newUser.getUserID(), newUser.getUsername());
+            UserResponse userResponse = new UserResponse(newUser.getUserId(), newUser.getUsername());
             return ResponseEntity.ok(new ApiResponse("User registered successfully", userResponse));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(new ApiResponse("Error: " + e.getMessage()));
         }
     }
 
-    // Đăng nhập người dùng
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         Optional<User> user = userService.loginUser(request.getUsername(), request.getPassword());
         
         return user.map(u -> {
-            UserResponse userResponse = new UserResponse(u.getUserID(), u.getUsername());
+            UserResponse userResponse = new UserResponse(u.getUserId(), u.getUsername());
             return ResponseEntity.ok(new ApiResponse("User login successfully", userResponse));
         }).orElseGet(() -> {
             return ResponseEntity.status(401).body(new ApiResponse("Invalid username or password"));
         });
     }
+
 
 }

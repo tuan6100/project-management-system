@@ -1,13 +1,15 @@
 package com.project.oop.PMS.service;
 
+import com.project.oop.PMS.dto.ProjectRequest;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class ProjectService {
@@ -15,8 +17,13 @@ public class ProjectService {
     @Autowired
     private ProjectRepository projectRepository;
 
-    public Project addProject(String name, String description, User manager) {
-        Project project = new Project(name, description);
+    @Autowired
+    @Lazy
+    private UserService userService;
+
+    public Project createProject(ProjectRequest projectRequest) {
+        Project project = new Project(projectRequest.getName(), projectRequest.getDescription());
+        User manager = userService.getUserById(projectRequest.getManagerId());
         project.setManager(manager);
         project.getMembers().add(manager);
         return projectRepository.save(project);
@@ -27,20 +34,15 @@ public class ProjectService {
     }
 
 
-    public Optional<Project> updateProject(Integer projectId, String name, String description, User user) {
-        Optional<Project> projectOpt = projectRepository.findById(projectId);
-        if (projectOpt.isPresent()) {
-            Project project = projectOpt.get();
-            if (project.getManager().getUserID().equals(user.getUserID())) {
-                project.setName(name);
-                project.setDescription(description);
-                projectRepository.save(project);
-                return Optional.of(project);
-            } else {
-                throw new RuntimeException("User is not authorized to update this project");
-            }
+    public Project updateProject(Integer projectId, Integer userId, ProjectRequest projectRequest) throws RuntimeException {
+        Project project = userService.getProject(projectId, userId);
+        if (projectRequest.getName() != null) {
+            project.setName(projectRequest.getName());
         }
-        return Optional.empty();
+        if (projectRequest.getDescription() != null) {
+            project.setDescription(projectRequest.getDescription());
+        }
+        return projectRepository.save(project);
     }
     
 //    public Optional<Project> getProjectById(Integer projectId, User user) {
@@ -52,58 +54,54 @@ public class ProjectService {
 //                project.getMembers().stream().anyMatch(member -> member.getUserID().equals(user.getUserID()))) {
 //                return Optional.of(project);
 //            } else {
-//                throw new RuntimeException("User is not authorized to access this project");
+//                throw new RuntimeRuntimeException("User is not authorized to access this project");
 //            }
 //        }
 //        return Optional.empty(); // Project không tồn tại
 //    }
 
-    public Project getProjectById(Integer projectId) throws Exception {
+    public Project getProjectById(Integer projectId) throws RuntimeException {
         return projectRepository.findById(projectId)
-                .orElseThrow(() -> new Exception("Project not found"));
+                .orElseThrow(() -> new RuntimeException("Project not found"));
     }
 
-    public User getManagerByProjectId(Integer projectId) throws Exception {
+    public User getManagerByProjectId(Integer projectId) throws RuntimeException {
         Project project = getProjectById(projectId);
         return project.getManager();
     }
 
-    public List<User> getMembersByProjectId(Integer projectId) throws Exception {
+    public List<User> getMembersByProjectId(Integer projectId) throws RuntimeException {
         Project project = getProjectById(projectId);
         return project.getMembers();
     }
 
-    public Project addMember(Integer projectId, Integer userId, Integer managerId) throws Exception {
+    public Project addMember(Integer projectId, Integer managerId, List<Integer> usersId) throws RuntimeException {
         Project project = getProjectById(projectId);
-        User user = getManagerByProjectId(projectId);
-        if (project.getManager().getUserID().equals(user.getUserID())) {
-            throw new RuntimeException("User is not authorized to update this project");
+        if (!project.getManager().getUserId().equals(managerId)) {
+            throw new RuntimeException("You does not have permission to do");
         }
-        project.getMembers().add(user);
+        usersId.forEach(userId -> {
+            User user = userService.getUserById(userId);
+            if (!project.getMembers().contains(user)) {
+                project.getMembers().add(user);
+            }
+        });
         return projectRepository.save(project);
     }
 
-    public Project removeMember(Integer projectId, Integer userId, Integer managerId) throws Exception {
+    public Project removeMember(Integer projectId, Integer managerId, Integer userId) throws RuntimeException {
         Project project = getProjectById(projectId);
         User user = getManagerByProjectId(projectId);
-        if (project.getManager().getUserID().equals(user.getUserID())) {
-            throw new RuntimeException("User is not authorized to update this project");
+        if (!project.getManager().getUserId().equals(managerId)) {
+            throw new RuntimeException("You does not have permission to do");
         }
         project.getMembers().remove(user);
         return projectRepository.save(project);
     }
 
-    public boolean deleteProjectByName(String projectName, User user) {
-        Optional<Project> projectOpt = projectRepository.findByName(projectName);
-        if (projectOpt.isPresent()) {
-            Project project = projectOpt.get();
-            // Kiểm tra nếu user là manager của project
-            if (project.getManager().getUserID().equals(user.getUserID())) {
-                projectRepository.delete(project);
-                return true;
-            }
-        }
-        return false;
+    public void deleteProject(Integer projectId, Integer userId) throws RuntimeException {
+        Project project = userService.getProject(projectId, userId);
+        projectRepository.delete(project);
     }
 
 }

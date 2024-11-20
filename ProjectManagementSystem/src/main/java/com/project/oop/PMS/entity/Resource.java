@@ -18,7 +18,7 @@ public class Resource {
 
     @ManyToOne
     @JsonBackReference
-    @JoinColumn(name = "project_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "project_id", referencedColumnName = "projectId", nullable = false)
     private Project project;
 
     private String licenceKey;

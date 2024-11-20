@@ -1,5 +1,6 @@
 package com.project.oop.PMS.dto;
 
+import com.project.oop.PMS.entity.User;
 import lombok.Data;
 
 @Data
@@ -12,5 +13,10 @@ public class UserResponse {
         this.username = username;
     }
 
-    // Getters and Setters
+    public static UserResponse fromEntity(User user) {
+        return new UserResponse(
+            user.getUserId(),
+            user.getUsername()
+        );
+    }
 }
