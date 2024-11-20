@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -80,21 +81,31 @@ public class ProjectService {
         if (!project.getManager().getUserId().equals(managerId)) {
             throw new RuntimeException("You do not have permission to do");
         }
+        List<String> errors = new ArrayList<>();
         usersId.forEach(userId -> {
             User user = userService.getUserById(userId);
             if (!project.getMembers().contains(user)) {
                 project.getMembers().add(user);
+            } else {
+                errors.add("User " + user.getUsername() + " is already a member of the project");
             }
         });
+        if (!errors.isEmpty()) {
+            projectRepository.save(project);
+            throw new RuntimeException(String.join("; ", errors));
+        }
         return projectRepository.save(project);
     }
 
     public void removeMember(Integer projectId, Integer managerId, Integer userId) throws RuntimeException {
+        if (userId.equals(managerId)) {
+            throw new RuntimeException("You cannot remove yourself from the project");
+        }
         Project project = getProjectById(projectId);
-        User user = getManagerByProjectId(projectId);
         if (!project.getManager().getUserId().equals(managerId)) {
             throw new RuntimeException("You do not have permission to do");
         }
+        User user = userService.getUserById(userId);
         project.getMembers().remove(user);
         projectRepository.save(project);
     }

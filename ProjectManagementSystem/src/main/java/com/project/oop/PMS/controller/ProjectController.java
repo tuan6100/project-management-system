@@ -35,7 +35,7 @@ public class ProjectController {
         return ResponseEntity.ok(ProjectResponse.fromEntity(project));
     }
 
-    @PostMapping("/add/{projectId}/member/add")
+    @PostMapping("{projectId}/member/add")
     public ResponseEntity<ProjectResponse> addMemberToProject(@PathVariable Integer projectId,
                                                       @RequestParam Integer managerId,
                                                       @RequestBody List<Integer> newMembers
@@ -47,7 +47,7 @@ public class ProjectController {
     @DeleteMapping("/{projectId}/member/remove")
     public ResponseEntity<String> removeMemberFromProject(@PathVariable Integer projectId,
                                                            @RequestParam Integer managerId,
-                                                           @RequestBody Integer memberId
+                                                           @RequestParam Integer memberId
                                                            ) throws RuntimeException {
         projectService.removeMember(projectId, managerId, memberId);
         return ResponseEntity.ok("Member " +  userService.getUserById(memberId).getUsername() + " removed successfully");
