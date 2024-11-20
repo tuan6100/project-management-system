@@ -8,6 +8,7 @@ import com.project.oop.PMS.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,13 +42,19 @@ public class UserService {
         return Optional.empty();
     }
 
-    public Optional<User> findUserById(Integer userId) {
-        return userRepository.findById(userId);
+    public User findUserById(Integer userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
-    public List<ProjectResponse> getAllProjectsByUserId(int memberId) {
-        List<Project> projects = projectRepository.findAllProjectsByUserId(memberId);
-        return projects.stream()
-                       .map(ProjectResponse::fromEntity)  // Ánh xạ từ entity sang DTO
-                       .collect(Collectors.toList());
+
+
+    public List<ProjectResponse> getAllProjectsByUser(Integer userID) throws Exception{
+        User user = findUserById(userID);
+        List<Project> projects = user.getMemberProjects();
+        List<ProjectResponse> projectReponses = new ArrayList<>();
+        projects.forEach(project -> {
+            projectReponses.add(ProjectResponse.fromEntity(project));
+        });
+        return projectReponses;
     }
 }

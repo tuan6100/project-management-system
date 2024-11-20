@@ -22,8 +22,8 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
 	Optional<Project> findByName(String projectName);
 	
-	 @Query(value = "SELECT p.* FROM projects p " +
-             "JOIN member_project mp ON p.id = mp.project_id " +
-             "WHERE mp.user_id = :user_id", nativeQuery = true)
-	 List<Project> findAllProjectsByUserId(@Param("user_id") int user_id);
+//	 @Query(value = "SELECT p.* FROM projects p " +
+//             "JOIN member_project mp ON p.id = mp.project_id " +
+//             "WHERE mp.user_id = :user_id", nativeQuery = true)
+//	 List<Project> findAllProjectsByUserId(@Param("user_id") int user_id);
 }

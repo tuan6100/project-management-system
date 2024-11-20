@@ -25,7 +25,7 @@ public class User {
     // Projects managed by this user
     @OneToMany(mappedBy = "manager")
     @JsonManagedReference
-    private Set<Project> managedProjects;
+    private Set<Project> managerProjects;
 
     // Projects where this user is a member
     @ManyToMany(mappedBy = "members")

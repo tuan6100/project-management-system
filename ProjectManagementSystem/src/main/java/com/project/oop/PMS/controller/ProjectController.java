@@ -31,7 +31,7 @@ public class ProjectController {
     public ResponseEntity<?> addProject(@RequestBody Map<String, String> request) {
         String name = request.get("name");
         String description = request.get("description");
-        Integer userId = Integer.parseInt(request.get("userId")); // Lấy user ID từ request
+        Integer userId = Integer.parseInt(request.get("userId"));
 
         Optional<User> userOpt = userService.findUserById(userId);
         if (userOpt.isPresent()) {
@@ -51,8 +51,8 @@ public class ProjectController {
 
     // Xem danh sách project
     @GetMapping("/get/{memberId}")
-    public ResponseEntity<List<ProjectResponse>> getAllProjectsByUserId(@PathVariable int memberId) {
-        List<ProjectResponse> projects = userService.getAllProjectsByUserId(memberId);
+    public ResponseEntity<List<ProjectResponse>> getAllProjectsByUserId(@PathVariable int memberId) throws Exception {
+        List<ProjectResponse> projects = userService.getAllProjectsByUser(memberId);
         return ResponseEntity.ok(projects);
     }
  // Truy cập vào project

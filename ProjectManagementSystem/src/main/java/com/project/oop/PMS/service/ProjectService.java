@@ -18,6 +18,7 @@ public class ProjectService {
     public Project addProject(String name, String description, User manager) {
         Project project = new Project(name, description);
         project.setManager(manager);
+        project.getMembers().add(manager);
         return projectRepository.save(project);
     }
 
@@ -25,8 +26,7 @@ public class ProjectService {
         return projectRepository.findAll();
     }
 
-    
-    
+
     public Optional<Project> updateProject(Integer projectId, String name, String description, User user) {
         Optional<Project> projectOpt = projectRepository.findById(projectId);
         if (projectOpt.isPresent()) {
@@ -43,19 +43,54 @@ public class ProjectService {
         return Optional.empty();
     }
     
-    public Optional<Project> getProjectById(Integer projectId, User user) {
-        Optional<Project> projectOpt = projectRepository.findById(projectId);
-        if (projectOpt.isPresent()) {
-            Project project = projectOpt.get();
-            // Kiểm tra nếu user là manager hoặc member của project
-            if (project.getManager().getUserID().equals(user.getUserID()) ||
-                project.getMembers().stream().anyMatch(member -> member.getUserID().equals(user.getUserID()))) {
-                return Optional.of(project);
-            } else {
-                throw new RuntimeException("User is not authorized to access this project");
-            }
+//    public Optional<Project> getProjectById(Integer projectId, User user) {
+//        Optional<Project> projectOpt = projectRepository.findById(projectId);
+//        if (projectOpt.isPresent()) {
+//            Project project = projectOpt.get();
+//            // Kiểm tra nếu user là manager hoặc member của project
+//            if (project.getManager().getUserID().equals(user.getUserID()) ||
+//                project.getMembers().stream().anyMatch(member -> member.getUserID().equals(user.getUserID()))) {
+//                return Optional.of(project);
+//            } else {
+//                throw new RuntimeException("User is not authorized to access this project");
+//            }
+//        }
+//        return Optional.empty(); // Project không tồn tại
+//    }
+
+    public Project getProjectById(Integer projectId) throws Exception {
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new Exception("Project not found"));
+    }
+
+    public User getManagerByProjectId(Integer projectId) throws Exception {
+        Project project = getProjectById(projectId);
+        return project.getManager();
+    }
+
+    public List<User> getMembersByProjectId(Integer projectId) throws Exception {
+        Project project = getProjectById(projectId);
+        return project.getMembers();
+    }
+
+    public Project addMember(Integer projectId, Integer userId, Integer managerId) throws Exception {
+        Project project = getProjectById(projectId);
+        User user = getManagerByProjectId(projectId);
+        if (project.getManager().getUserID().equals(user.getUserID())) {
+            throw new RuntimeException("User is not authorized to update this project");
         }
-        return Optional.empty(); // Project không tồn tại
+        project.getMembers().add(user);
+        return projectRepository.save(project);
+    }
+
+    public Project removeMember(Integer projectId, Integer userId, Integer managerId) throws Exception {
+        Project project = getProjectById(projectId);
+        User user = getManagerByProjectId(projectId);
+        if (project.getManager().getUserID().equals(user.getUserID())) {
+            throw new RuntimeException("User is not authorized to update this project");
+        }
+        project.getMembers().remove(user);
+        return projectRepository.save(project);
     }
 
     public boolean deleteProjectByName(String projectName, User user) {
