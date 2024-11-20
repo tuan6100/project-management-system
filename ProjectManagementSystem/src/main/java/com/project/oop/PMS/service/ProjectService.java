@@ -78,7 +78,7 @@ public class ProjectService {
     public Project addMember(Integer projectId, Integer managerId, List<Integer> usersId) throws RuntimeException {
         Project project = getProjectById(projectId);
         if (!project.getManager().getUserId().equals(managerId)) {
-            throw new RuntimeException("You does not have permission to do");
+            throw new RuntimeException("You do not have permission to do");
         }
         usersId.forEach(userId -> {
             User user = userService.getUserById(userId);
@@ -89,18 +89,21 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public Project removeMember(Integer projectId, Integer managerId, Integer userId) throws RuntimeException {
+    public void removeMember(Integer projectId, Integer managerId, Integer userId) throws RuntimeException {
         Project project = getProjectById(projectId);
         User user = getManagerByProjectId(projectId);
         if (!project.getManager().getUserId().equals(managerId)) {
-            throw new RuntimeException("You does not have permission to do");
+            throw new RuntimeException("You do not have permission to do");
         }
         project.getMembers().remove(user);
-        return projectRepository.save(project);
+        projectRepository.save(project);
     }
 
-    public void deleteProject(Integer projectId, Integer userId) throws RuntimeException {
-        Project project = userService.getProject(projectId, userId);
+    public void deleteProject(Integer projectId, Integer managerId) throws RuntimeException {
+        Project project = getProjectById(projectId);
+        if (!project.getManager().getUserId().equals(managerId)) {
+            throw new RuntimeException("You do not have permission to do");
+        }
         projectRepository.delete(project);
     }
 

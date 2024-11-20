@@ -29,7 +29,7 @@ public class User {
     @JsonManagedReference
     private List<Project> managerProjects;
 
-    @ManyToMany(mappedBy = "members")
+    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @ToString.Exclude
     private List<Project> memberProjects = new ArrayList<>();
 

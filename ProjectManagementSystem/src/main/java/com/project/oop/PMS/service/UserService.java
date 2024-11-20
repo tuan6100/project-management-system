@@ -56,8 +56,8 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Project not found"));
     }
 
-    public List<ProjectResponse> getAllProjectsByUser(Integer userID) throws RuntimeException{
-        User user = getUserById(userID);
+    public List<ProjectResponse> getAllProjectsByUser(Integer userId) throws RuntimeException{
+        User user = getUserById(userId);
         List<Project> projects = user.getMemberProjects();
         List<ProjectResponse> projectReponses = new ArrayList<>();
         projects.forEach(project -> {

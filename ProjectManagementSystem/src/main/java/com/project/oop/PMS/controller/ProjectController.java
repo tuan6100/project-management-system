@@ -67,8 +67,8 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{projectId}")
-    public ResponseEntity<?> deleteProject(@PathVariable Integer projectId, @RequestParam Integer userId) throws RuntimeException {
-        projectService.deleteProject(projectId, userId);
+    public ResponseEntity<?> deleteProject(@PathVariable Integer projectId, @RequestParam Integer managerId) throws RuntimeException {
+        projectService.deleteProject(projectId, managerId);
         return ResponseEntity.ok(Map.of("message", "Project deleted successfully"));
     }
 

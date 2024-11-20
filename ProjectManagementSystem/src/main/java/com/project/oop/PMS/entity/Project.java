@@ -36,7 +36,7 @@ public class Project {
     private User manager; 
 
     // Relationship for members of the project
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
         name = "member_project",
         joinColumns = @JoinColumn(name = "projectId"),
