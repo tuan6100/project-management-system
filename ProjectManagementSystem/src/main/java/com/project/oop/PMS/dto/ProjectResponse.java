@@ -2,7 +2,9 @@ package com.project.oop.PMS.dto;
 
 import com.project.oop.PMS.entity.Project;
 
+import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.User;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,20 +14,15 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class ProjectResponse {
     private Integer id;
     private String name;
     private String description;
     private UserResponse manager;
     private List<UserResponse> members;
+    private List<TaskResponse> tasks;
 
-    public ProjectResponse(Integer id, String name, String description, UserResponse manager, List<UserResponse> members) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.manager = manager;
-        this.members = members;
-    }
 
     public static ProjectResponse fromEntity(Project project) {
         ProjectResponse projectResponse = new ProjectResponse();
@@ -44,6 +41,13 @@ public class ProjectResponse {
             }
         }
         projectResponse.setMembers(userResponses);
+        List<TaskResponse> taskResponses = new ArrayList<>();
+        if (project.getTasks() != null) {
+            for (Task task : project.getTasks()) {
+                taskResponses.add(TaskResponse.fromEntity(task));
+            }
+        }
+        projectResponse.setTasks(taskResponses);
         return projectResponse;
     }
 
