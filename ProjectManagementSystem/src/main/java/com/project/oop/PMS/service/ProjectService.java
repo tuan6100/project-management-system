@@ -1,7 +1,10 @@
 package com.project.oop.PMS.service;
 
 import com.project.oop.PMS.dto.ProjectRequest;
+import com.project.oop.PMS.dto.TaskResponse;
+import com.project.oop.PMS.entity.MemberTask;
 import com.project.oop.PMS.entity.Project;
+import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.ProjectRepository;
@@ -10,8 +13,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class ProjectService {
@@ -22,6 +25,10 @@ public class ProjectService {
     @Autowired
     @Lazy
     private UserService userService;
+
+    @Autowired
+    @Lazy
+    private TaskService taskService;
 
     public Project createProject(ProjectRequest projectRequest) throws CodeException {
         Project project = new Project(projectRequest.getName(), projectRequest.getDescription());
@@ -46,33 +53,18 @@ public class ProjectService {
         }
         return projectRepository.save(project);
     }
-    
-//    public Optional<Project> getProjectById(Integer projectId, User user) {
-//        Optional<Project> projectOpt = projectRepository.findById(projectId);
-//        if (projectOpt.isPresent()) {
-//            Project project = projectOpt.get();
-//            // Kiểm tra nếu user là manager hoặc member của project
-//            if (project.getManager().getUserID().equals(user.getUserID()) ||
-//                project.getMembers().stream().anyMatch(member -> member.getUserID().equals(user.getUserID()))) {
-//                return Optional.of(project);
-//            } else {
-//                throw new RuntimeCodeException("User is not authorized to access this project");
-//            }
-//        }
-//        return Optional.empty(); // Project không tồn tại
-//    }
 
     public Project getProjectById(Integer projectId) throws CodeException {
         return projectRepository.findById(projectId)
                 .orElseThrow(() -> new CodeException("Project not found"));
     }
 
-    public User getManagerByProjectId(Integer projectId) throws CodeException {
+    public User getManager(Integer projectId) throws CodeException {
         Project project = getProjectById(projectId);
         return project.getManager();
     }
 
-    public List<User> getMembersByProjectId(Integer projectId) throws CodeException {
+    public List<User> getMembers(Integer projectId) throws CodeException {
         Project project = getProjectById(projectId);
         return project.getMembers();
     }
@@ -127,6 +119,60 @@ public class ProjectService {
             throw new CodeException("You do not have permission to do");
         }
         projectRepository.delete(project);
+    }
+
+    public List<Task> getTasks(Integer projectId) throws CodeException {
+        Project project = getProjectById(projectId);
+        return project.getTasks();
+    }
+
+    public List<TaskResponse> getTasksInProject(Integer projectId) throws CodeException {
+        Project project = getProjectById(projectId);
+        List<TaskResponse> taskResponses = new ArrayList<>();
+        for (Task task : project.getTasks()) {
+            taskResponses.add(TaskResponse.fromEntity(task));
+        }
+        return taskResponses;
+    }
+
+    public List<TaskResponse> getTaskCompleted(Integer projectId) throws CodeException {
+        Project project = getProjectById(projectId);
+        List<Task> tasks = project.getTasks();
+        List<TaskResponse> taskResponses = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDueDate().after(new Date()) && task.getMemberTasks().stream().allMatch(MemberTask::getIsCompleted)) {
+                taskResponses.add(TaskResponse.fromEntity(task));
+            }
+        }
+        return taskResponses;
+    }
+
+    public List<TaskResponse> getTaskOverdue(Integer projectId) throws CodeException {
+        Project project = getProjectById(projectId);
+        List<Task> tasks = project.getTasks();
+        List<TaskResponse> taskResponses = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDueDate().before(new Date()) && task.getMemberTasks().stream().anyMatch(mt -> !mt.getIsCompleted())) {
+                taskResponses.add(TaskResponse.fromEntity(task));
+            }
+        }
+        return taskResponses;
+    }
+
+    public Integer getAmountOfTask(Integer projectId) throws CodeException {
+        Project project = getProjectById(projectId);
+        return project.getTasks().size();
+    }
+
+    public Integer getProgress(Integer projectId) throws CodeException {
+        Project project = getProjectById(projectId);
+        List<Task> tasks = project.getTasks();
+        if (tasks.isEmpty()) {
+            return 0;
+        }
+        long totalTasks = tasks.size();
+        long completedTasks = getTaskCompleted(projectId).size();
+        return (int) (completedTasks * 100 / totalTasks);
     }
 
 }

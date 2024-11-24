@@ -15,27 +15,27 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 @Data
 @Table(name = "projects")
 public class Project {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer projectId;
 
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "description")
     private String description;
 
-    // Relationship with resources (each project can have multiple resources)
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Resource> resources;
 
-    // Relationship to link a User as the manager of the project
-   
+
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY) // Cascade giúp tự động lưu User nếu User chưa được lưu
     @JoinColumn(name = "manager_id")
     @JsonBackReference
     private User manager; 
 
-    // Relationship for members of the project
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinTable(
         name = "member_project",
@@ -45,10 +45,10 @@ public class Project {
     private List<User> members = new ArrayList<>();
 
     @OneToMany(mappedBy = "project", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    private Set<Task> tasks;
+    @JsonManagedReference("project-task")
+    private List<Task> tasks = new ArrayList<>();
 
 
-    // Constructors
     public Project() {}
 
     public Project(String name, String description) {

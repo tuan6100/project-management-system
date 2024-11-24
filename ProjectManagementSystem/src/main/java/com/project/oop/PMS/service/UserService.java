@@ -1,9 +1,12 @@
 package com.project.oop.PMS.service;
 
 import com.project.oop.PMS.dto.ProjectResponse;
+import com.project.oop.PMS.dto.TaskResponse;
 import com.project.oop.PMS.entity.Project;
+import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.exception.CodeException;
+import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -23,6 +26,10 @@ public class UserService {
     @Autowired
     @Lazy
     private ProjectService projectService;
+
+    @Autowired
+    private MemberTaskRepository memberTaskRepository;
+
     
     public User registerUser(String username, String password) throws CodeException {
         if (userRepository.findByUsernameAndPassword(username, password).isPresent()) {
@@ -63,4 +70,21 @@ public class UserService {
         });
         return projectReponses;
     }
+
+    public List<TaskResponse> getAllTasksByUser(Integer userId) throws CodeException{
+        User user = getUserById(userId);
+        List<Task> tasks = memberTaskRepository.getTasksByUserId(userId);
+        List<TaskResponse> taskResponses = new ArrayList<>();
+        tasks.forEach(task -> taskResponses.add(TaskResponse.fromEntity(task)));
+        return taskResponses;
+    }
+
+    public List<TaskResponse> getTasksCompletedByUser(Integer userId) throws CodeException{
+        User user = getUserById(userId);
+        List<Task> tasks = memberTaskRepository.getTasksCompletedByUser(userId);
+        List<TaskResponse> taskResponses = new ArrayList<>();
+        tasks.forEach(task -> taskResponses.add(TaskResponse.fromEntity(task)));
+        return taskResponses;
+    }
+
 }

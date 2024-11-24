@@ -1,5 +1,6 @@
 package com.project.oop.PMS.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,18 +23,20 @@ public class User {
     private String username;
 
     @Column(name = "password", nullable = false)
+    @JsonIgnore
     private String password;
 
-    // Projects managed by this user
+
     @OneToMany(mappedBy = "manager")
-    @JsonManagedReference
-    private List<Project> managerProjects;
+    private List<Project> managerProjects = new ArrayList<>();
 
     @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @ToString.Exclude
     private List<Project> memberProjects = new ArrayList<>();
 
-    // Tasks where this user is a member
-    @ManyToMany(mappedBy = "members")
-    private Set<Task> memberTasks;
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @JsonManagedReference("user-memberTask")
+    private List<MemberTask> memberTasks = new ArrayList<>();
+
+
 }
