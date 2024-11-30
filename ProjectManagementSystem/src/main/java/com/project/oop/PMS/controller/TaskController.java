@@ -33,13 +33,13 @@ public class TaskController {
         return ResponseEntity.ok().body(taskResponses);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest taskRequest, @PathVariable Integer projectId, @RequestParam  Integer managerId) throws CodeException {
+    @PostMapping("/create/{managerId}")
+    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest taskRequest, @PathVariable Integer projectId, @PathVariable Integer managerId) throws CodeException {
         return ResponseEntity.ok().body(TaskResponse.fromEntity(taskService.createTask(taskRequest, projectId, managerId)));
     }
 
-    @PostMapping("{taskId}/assign")
-    public ResponseEntity<String> assignMember(@PathVariable Integer taskId, @RequestParam  Integer managerId, @RequestParam Integer memberId) throws CodeException {
+    @PostMapping("{taskId}/assign/{managerId}/{memberId}")
+    public ResponseEntity<String> assignMember(@PathVariable Integer taskId, @PathVariable Integer managerId, @PathVariable Integer memberId) throws CodeException {
         return ResponseEntity.ok(taskService.assignMember(taskId, memberId, managerId));
     }
 
@@ -48,23 +48,23 @@ public class TaskController {
         return ResponseEntity.ok().body(TaskResponse.fromEntity(taskService.getTaskById(taskId)));
     }
 
-    @PutMapping("{taskId}/complete")
-    public ResponseEntity<TaskResponse> completeTask(@PathVariable Integer taskId, @RequestParam Integer memberId) throws CodeException {
+    @PutMapping("{taskId}/complete/{memberId}")
+    public ResponseEntity<TaskResponse> completeTask(@PathVariable Integer taskId, @PathVariable Integer memberId) throws CodeException {
         return ResponseEntity.ok().body(TaskResponse.fromEntity(taskService.completeTask(taskId, memberId)));
     }
 
-    @PutMapping("{taskId}")
-    public ResponseEntity<TaskResponse> updateTask(@PathVariable Integer taskId, @RequestBody TaskRequest taskRequest, @RequestParam Integer managerId) throws CodeException {
+    @PutMapping("{taskId}/update/{managerId}/{memberId}")
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Integer taskId, @RequestBody TaskRequest taskRequest, @PathVariable Integer managerId) throws CodeException {
         return ResponseEntity.ok().body(TaskResponse.fromEntity(taskService.updateTask(taskId, taskRequest, managerId)));
     }
 
-    @DeleteMapping("{taskId}/remove")
-    public ResponseEntity<String> removeMember(@PathVariable Integer taskId, @RequestParam  Integer managerId, @RequestParam Integer memberId) throws CodeException {
+    @DeleteMapping("{taskId}/remove/{managerId}/{memberId}")
+    public ResponseEntity<String> removeMember(@PathVariable Integer taskId, @PathVariable Integer managerId, @PathVariable Integer memberId) throws CodeException {
         return ResponseEntity.ok(taskService.removeMember(taskId, memberId, managerId));
     }
 
-    @DeleteMapping("{taskId}")
-    public ResponseEntity<String> deleteTask(@PathVariable Integer taskId, @RequestParam Integer managerId) throws CodeException {
+    @DeleteMapping("{taskId}/delete/{managerId}")
+    public ResponseEntity<String> deleteTask(@PathVariable Integer taskId, @PathVariable Integer managerId) throws CodeException {
         taskService.deleteTask(taskId, managerId);
         return ResponseEntity.ok("Task deleted successfully");
     }

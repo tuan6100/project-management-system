@@ -30,9 +30,9 @@ public class ProjectService {
     @Lazy
     private TaskService taskService;
 
-    public Project createProject(ProjectRequest projectRequest) throws CodeException {
+    public Project createProject(ProjectRequest projectRequest, Integer managerId) throws CodeException {
         Project project = new Project(projectRequest.getName(), projectRequest.getDescription());
-        User manager = userService.getUserById(projectRequest.getManagerId());
+        User manager = userService.getUserById(managerId);
         project.setManager(manager);
         project.getMembers().add(manager);
         return projectRepository.save(project);

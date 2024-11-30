@@ -16,12 +16,12 @@ public class MemberTask {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer memberTaskId;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "task_id")
     @JsonBackReference("task-memberTask")
     private Task task;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     @JsonBackReference("user-memberTask")
     private User member;

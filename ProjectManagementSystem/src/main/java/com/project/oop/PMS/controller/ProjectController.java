@@ -23,9 +23,9 @@ public class ProjectController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/add")
-    public ResponseEntity<ProjectResponse> addProject(@RequestBody ProjectRequest request) throws CodeException {
-        Project project = projectService.createProject(request);
+    @PostMapping("/add/{managerId}")
+    public ResponseEntity<ProjectResponse> addProject(@RequestBody ProjectRequest request, @PathVariable Integer managerId) throws CodeException {
+        Project project = projectService.createProject(request, managerId);
         return ResponseEntity.ok(ProjectResponse.fromEntity(project));
     }
 
@@ -35,19 +35,19 @@ public class ProjectController {
         return ResponseEntity.ok(ProjectResponse.fromEntity(project));
     }
 
-    @PostMapping("{projectId}/member/add")
+    @PostMapping("{projectId}/member/add/{managerId}")
     public ResponseEntity<ProjectResponse> addMemberToProject(@PathVariable Integer projectId,
-                                                      @RequestParam Integer managerId,
+                                                      @PathVariable Integer managerId,
                                                       @RequestBody List<Integer> newMembers
                                                       ) throws CodeException {
         Project project = projectService.addMember(projectId, managerId, newMembers);
         return ResponseEntity.ok(ProjectResponse.fromEntity(project));
     }
 
-    @DeleteMapping("/{projectId}/member/remove")
+    @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberId}")
     public ResponseEntity<String> removeMemberFromProject(@PathVariable Integer projectId,
-                                                           @RequestParam Integer managerId,
-                                                           @RequestParam Integer memberId
+                                                           @PathVariable Integer managerId,
+                                                           @PathVariable Integer memberId
                                                            ) throws CodeException {
         projectService.removeMember(projectId, managerId, memberId);
         return ResponseEntity.ok("Member " +  userService.getUserById(memberId).getUsername() + " removed successfully");
@@ -66,8 +66,8 @@ public class ProjectController {
         ));
     }
 
-    @DeleteMapping("/{projectId}")
-    public ResponseEntity<?> deleteProject(@PathVariable Integer projectId, @RequestParam Integer managerId) throws CodeException {
+    @DeleteMapping("/{projectId}/delete/{managerId}")
+    public ResponseEntity<?> deleteProject(@PathVariable Integer projectId, @PathVariable Integer managerId) throws CodeException {
         projectService.deleteProject(projectId, managerId);
         return ResponseEntity.ok(Map.of("message", "Project deleted successfully"));
     }

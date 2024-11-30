@@ -18,7 +18,6 @@ public class TaskRequest {
     private String title;
     private String description;
     private Date dueDate;
-    private List<Integer> memberIds;
 
     public Task toTask() {
         Task task = new Task();

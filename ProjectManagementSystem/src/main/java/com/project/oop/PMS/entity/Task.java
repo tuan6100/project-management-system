@@ -21,7 +21,7 @@ public class Task {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JsonBackReference("project-task")
-    @JoinColumn(name = "projectId")
+    @JoinColumn(name = "project_id")
     private Project project;
 
     @Column(name = "title")
@@ -33,7 +33,7 @@ public class Task {
     @Temporal(TemporalType.DATE)
     private Date dueDate;
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonManagedReference("task-memberTask")
     private List<MemberTask> memberTasks = new ArrayList<>();
 

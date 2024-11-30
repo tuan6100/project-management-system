@@ -44,14 +44,14 @@ public class TaskService {
             throw new CodeException("Due date must be in the future");
         }
         Task task = taskRequest.toTask();
-        for (Integer memberId : taskRequest.getMemberIds()) {
-            if (projectService.getProjectById(projectId).getMembers().stream().noneMatch(user -> user.getUserId().equals(memberId))) {
-                throw new CodeException("User is not a member of this project");
-            }
-            MemberTask memberTask = new MemberTask(task, userService.getUserById(memberId), false);
-            memberTaskRepository.save(memberTask);
-            task.getMemberTasks().add(memberTask);
-        }
+//        for (Integer memberId : taskRequest.getMemberIds()) {
+//            if (projectService.getProjectById(projectId).getMembers().stream().noneMatch(user -> user.getUserId().equals(memberId))) {
+//                throw new CodeException("User is not a member of this project");
+//            }
+//            MemberTask memberTask = new MemberTask(task, userService.getUserById(memberId), false);
+//            memberTaskRepository.save(memberTask);
+//            task.getMemberTasks().add(memberTask);
+//        }
         task.setProject(projectService.getProjectById(projectId));
         return taskRepository.save(task);
     }

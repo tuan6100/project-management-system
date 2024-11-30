@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @AllArgsConstructor
 public class ProjectRequest {
 
-    private Integer managerId;
     private String name;
     private String description;
 }
