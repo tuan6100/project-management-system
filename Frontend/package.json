@@ -1,0 +1,20 @@
+{
+  "name": "oop-project_pms-project",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/daokiencuong/OOP-Project_PMS-Project.git"
+  },
+  "private": true,
+  "dependencies": {
+    "express": "^4.21.1",
+    "toastify-js": "^1.12.0"
+  }
+}
