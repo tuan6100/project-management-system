@@ -9,19 +9,19 @@ import java.util.Date;
 
 @Data
 @Entity
-@Table(name = "member_tasks")
+@Table(name = "member_task")
 public class MemberTask {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer memberTaskId;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "task_id")
     @JsonBackReference("task-memberTask")
     private Task task;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "user_id")
     @JsonBackReference("user-memberTask")
     private User member;
@@ -31,6 +31,11 @@ public class MemberTask {
 
     @Column(name = "completed_date")
     private Date completedDate;
+
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "member_project_id")
+    @JsonBackReference("memberProject-memberTask")
+    private MemberProject memberProject;
 
 
     public MemberTask() {}

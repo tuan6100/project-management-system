@@ -6,6 +6,7 @@ import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.exception.CodeException;
+import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 public class UserService {
@@ -24,16 +24,31 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private MemberProjectRepository memberProjectRepository;
+
+    @Autowired
     @Lazy
     private ProjectService projectService;
 
     @Autowired
     private MemberTaskRepository memberTaskRepository;
 
+    public User getUserById(Integer userId) throws CodeException {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new CodeException("User not found"));
+    }
+
+    public User getUserByAuth(String username, String password) throws CodeException {
+        User user =  userRepository.findByUsernameAndPassword(username, password);
+        if (user == null) {
+            throw new CodeException("User not found");
+        }
+        return user;
+    }
     
-    public User registerUser(String username, String password) throws CodeException {
-        if (userRepository.findByUsernameAndPassword(username, password).isPresent()) {
-            throw new CodeException ("Username đã tồn tại!");
+    public User register(String username, String password) throws CodeException {
+        if (getUserByAuth(username, password) != null) {
+            throw new CodeException ("Username already exist!");
         }
         User user = new User();
         user.setUsername(username);
@@ -41,38 +56,19 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> loginUser(String username, String password) {
-        Optional<User> user = userRepository.findByUsernameAndPassword(username, password);
-        if (user.isPresent() && user.get().getPassword().equals(password)) {
-            return user;
-        }
-        return Optional.empty();
+    public User login(String username, String password) throws CodeException {
+        return getUserByAuth(username, password);
     }
 
-    public User getUserById(Integer userId) throws CodeException {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new CodeException("User not found"));
-    }
 
-    public Project getProject(Integer projectId, Integer userId) throws CodeException{
-        return getUserById(userId).getMemberProjects().stream()
-                .filter(project -> project.getProjectId().equals(projectId))
-                .findFirst()
-                .orElseThrow(() -> new CodeException("Project not found"));
-    }
-
-    public List<ProjectResponse> getAllProjectsByUser(Integer userId) throws CodeException{
-        User user = getUserById(userId);
-        List<Project> projects = user.getMemberProjects();
-        List<ProjectResponse> projectReponses = new ArrayList<>();
-        projects.forEach(project -> {
-            projectReponses.add(ProjectResponse.fromEntity(project));
-        });
-        return projectReponses;
+    public List<ProjectResponse> getAllProjects(Integer userId) throws CodeException{
+        List<Project> memberProjects = memberProjectRepository.findProjectsByUserId(userId);
+        List<ProjectResponse> projectResponses = new ArrayList<>();
+        memberProjects.forEach(project -> projectResponses.add(projectService.getProjectResponse(project)));
+        return projectResponses;
     }
 
     public List<TaskResponse> getAllTasksByUser(Integer userId) throws CodeException{
-        User user = getUserById(userId);
         List<Task> tasks = memberTaskRepository.getTasksByUserId(userId);
         List<TaskResponse> taskResponses = new ArrayList<>();
         tasks.forEach(task -> taskResponses.add(TaskResponse.fromEntity(task)));
@@ -80,7 +76,6 @@ public class UserService {
     }
 
     public List<TaskResponse> getTasksCompletedByUser(Integer userId) throws CodeException{
-        User user = getUserById(userId);
         List<Task> tasks = memberTaskRepository.getTasksCompletedByUser(userId);
         List<TaskResponse> taskResponses = new ArrayList<>();
         tasks.forEach(task -> taskResponses.add(TaskResponse.fromEntity(task)));

@@ -26,13 +26,13 @@ public class ProjectController {
     @PostMapping("/add/{managerId}")
     public ResponseEntity<ProjectResponse> addProject(@RequestBody ProjectRequest request, @PathVariable Integer managerId) throws CodeException {
         Project project = projectService.createProject(request, managerId);
-        return ResponseEntity.ok(ProjectResponse.fromEntity(project));
+        return ResponseEntity.ok(projectService.getProjectResponse(project));
     }
 
     @GetMapping("/{projectId}/info")
     public ResponseEntity<ProjectResponse> getProjectInfo(@PathVariable Integer projectId) throws CodeException {
         Project project = projectService.getProjectById(projectId);
-        return ResponseEntity.ok(ProjectResponse.fromEntity(project));
+        return ResponseEntity.ok(projectService.getProjectResponse(project));
     }
 
     @PostMapping("{projectId}/member/add/{managerId}")
@@ -41,7 +41,7 @@ public class ProjectController {
                                                       @RequestBody List<Integer> newMembers
                                                       ) throws CodeException {
         Project project = projectService.addMember(projectId, managerId, newMembers);
-        return ResponseEntity.ok(ProjectResponse.fromEntity(project));
+        return ResponseEntity.ok(projectService.getProjectResponse(project));
     }
 
     @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberId}")
@@ -72,11 +72,8 @@ public class ProjectController {
         return ResponseEntity.ok(Map.of("message", "Project deleted successfully"));
     }
 
-    @GetMapping("{userId}/get")
-    public ResponseEntity<List<ProjectResponse>> getAllProjectsByUserId(@PathVariable int userId) throws CodeException {
-        List<ProjectResponse> projects = userService.getAllProjectsByUser(userId);
-        return ResponseEntity.ok(projects);
-    }
+
+
 
 
 }

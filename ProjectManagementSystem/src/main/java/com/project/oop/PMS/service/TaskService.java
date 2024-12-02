@@ -1,10 +1,9 @@
 package com.project.oop.PMS.service;
 
 import com.project.oop.PMS.dto.TaskRequest;
-import com.project.oop.PMS.entity.MemberTask;
-import com.project.oop.PMS.entity.Task;
-import com.project.oop.PMS.entity.User;
+import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
+import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,9 @@ public class TaskService {
     private MemberTaskRepository memberTaskRepository;
 
     @Autowired
+    private MemberProjectRepository memberProjectRepository;
+
+    @Autowired
     @Lazy
     private ProjectService projectService;
 
@@ -37,21 +39,13 @@ public class TaskService {
     }
 
     public Task createTask(TaskRequest taskRequest, Integer projectId, Integer managerId) throws CodeException {
-        if (projectService.getManager(projectId).getUserId() != managerId) {
+        if (!projectService.getManager(projectId).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
         if (taskRequest.getDueDate().before(new Date())) {
             throw new CodeException("Due date must be in the future");
         }
         Task task = taskRequest.toTask();
-//        for (Integer memberId : taskRequest.getMemberIds()) {
-//            if (projectService.getProjectById(projectId).getMembers().stream().noneMatch(user -> user.getUserId().equals(memberId))) {
-//                throw new CodeException("User is not a member of this project");
-//            }
-//            MemberTask memberTask = new MemberTask(task, userService.getUserById(memberId), false);
-//            memberTaskRepository.save(memberTask);
-//            task.getMemberTasks().add(memberTask);
-//        }
         task.setProject(projectService.getProjectById(projectId));
         return taskRepository.save(task);
     }
@@ -59,19 +53,22 @@ public class TaskService {
 
     public String assignMember(Integer taskId, Integer memberId, Integer managerId) throws CodeException {
         Task task = getTaskById(taskId);
-        if (projectService.getManager(task.getProject().getProjectId()).getUserId() != managerId) {
+        Project project = task.getProject();
+        if (!projectService.getManager(project.getProjectId()).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
-        if (task.getProject().getMembers().stream().noneMatch(user -> user.getUserId().equals(memberId))) {
+        if (!(projectService.getMembers(project.getProjectId()).contains(userService.getUserById(memberId)))) {
             throw new CodeException("User is not a member of this project");
         }
         if (task.getMemberTasks().stream().anyMatch(mt -> mt.getMember().getUserId().equals(memberId))) {
             throw new CodeException("User " + userService.getUserById(memberId).getUsername() + " is already assigned to this task");
         }
         MemberTask memberTask = new MemberTask();
+        MemberProject memberProject = memberProjectRepository.findByUserAndProject(userService.getUserById(memberId), project);
         memberTask.setTask(task);
         memberTask.setMember(userService.getUserById(memberId));
         memberTask.setIsCompleted(false);
+        memberTask.setMemberProject(memberProject);
         memberTaskRepository.save(memberTask);
         task.getMemberTasks().add(memberTask);
         taskRepository.save(task);
@@ -81,14 +78,14 @@ public class TaskService {
 
     public String removeMember(Integer taskId, Integer memberId, Integer managerId) throws CodeException {
         Task task = getTaskById(taskId);
-        if (projectService.getManager(task.getProject().getProjectId()).getUserId() != managerId) {
+        if (!projectService.getManager(task.getProject().getProjectId()).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
-        if (managerId == memberId) {
+        if (managerId.equals(memberId)) {
             throw new CodeException("You cannot remove yourself from the task");
         }
         MemberTask memberTask = task.getMemberTasks().stream()
-                .filter(mt -> mt.getMember().getUserId() == memberId)
+                .filter(mt -> mt.getMember().getUserId().equals((memberId)))
                 .findFirst()
                 .orElseThrow(() -> new CodeException("User is not a member of this task"));
         task.getMemberTasks().remove(memberTask);
@@ -99,7 +96,7 @@ public class TaskService {
 
     public Task updateTask(Integer taskId, TaskRequest taskRequest, Integer managerId) throws CodeException {
         Task task = getTaskById(taskId);
-        if (projectService.getManager(task.getProject().getProjectId()).getUserId() != managerId) {
+        if (projectService.getManager(task.getProject().getProjectId()).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
         if (taskRequest.getTitle() != null) {
@@ -113,7 +110,7 @@ public class TaskService {
 
     public void deleteTask(Integer taskId, Integer managerId) throws CodeException {
         Task task = getTaskById(taskId);
-        if (projectService.getManager(task.getProject().getProjectId()).getUserId() != managerId) {
+        if (!projectService.getManager(task.getProject().getProjectId()).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
         taskRepository.deleteById(taskId);
@@ -126,7 +123,7 @@ public class TaskService {
     public Boolean isOnTime(Integer taskId, Integer memberId) throws CodeException {
         Task task = getTaskById(taskId);
         User user = userService.getUserById(memberId);
-        if (user.getUserId() != memberId) {
+        if (user.getUserId().equals((memberId))) {
             throw new CodeException("User is not a member of this project");
         }
         MemberTask memberTask = memberTaskRepository.findByMemberAndTask(user, task);
@@ -136,7 +133,7 @@ public class TaskService {
     public Boolean isOverdue(Integer taskId, Integer memberId) throws CodeException {
         Task task = getTaskById(taskId);
         User user = userService.getUserById(memberId);
-        if (user.getUserId() != memberId) {
+        if (user.getUserId().equals((memberId))) {
             throw new CodeException("User is not a member of this project");
         }
         MemberTask memberTask = memberTaskRepository.findByMemberAndTask(user, task);

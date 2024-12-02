@@ -21,6 +21,8 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
     List<Project> findAll();
 
 	Optional<Project> findByName(String projectName);
+
+
 	
 //	 @Query(value = "SELECT p.* FROM projects p " +
 //             "JOIN member_project mp ON p.id = mp.project_id " +

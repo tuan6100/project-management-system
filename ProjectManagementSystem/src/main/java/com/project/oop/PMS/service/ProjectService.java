@@ -1,13 +1,15 @@
 package com.project.oop.PMS.service;
 
 import com.project.oop.PMS.dto.ProjectRequest;
+import com.project.oop.PMS.dto.ProjectResponse;
 import com.project.oop.PMS.dto.TaskResponse;
-import com.project.oop.PMS.entity.MemberTask;
-import com.project.oop.PMS.entity.Project;
-import com.project.oop.PMS.entity.Task;
-import com.project.oop.PMS.entity.User;
+import com.project.oop.PMS.dto.UserResponse;
+import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
+import com.project.oop.PMS.repository.MemberProjectRepository;
+import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.ProjectRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,9 @@ public class ProjectService {
     private ProjectRepository projectRepository;
 
     @Autowired
+    private MemberProjectRepository memberProjectRepository;
+
+    @Autowired
     @Lazy
     private UserService userService;
 
@@ -30,11 +35,11 @@ public class ProjectService {
     @Lazy
     private TaskService taskService;
 
-    public Project createProject(ProjectRequest projectRequest, Integer managerId) throws CodeException {
+    public Project createProject(ProjectRequest projectRequest, Integer userId) throws CodeException {
         Project project = new Project(projectRequest.getName(), projectRequest.getDescription());
-        User manager = userService.getUserById(managerId);
-        project.setManager(manager);
-        project.getMembers().add(manager);
+        User manager = userService.getUserById(userId);
+        MemberProject memberProject = new MemberProject(manager, project, "Manager");
+        memberProjectRepository.save(memberProject);
         return projectRepository.save(project);
     }
 
@@ -42,15 +47,13 @@ public class ProjectService {
         return projectRepository.findAll();
     }
 
-
-    public Project updateProject(Integer projectId, Integer userId, ProjectRequest projectRequest) throws CodeException {
-        Project project = userService.getProject(projectId, userId);
-        if (projectRequest.getName() != null) {
-            project.setName(projectRequest.getName());
+    public Project updateProject(Integer projectId, Integer managerId, ProjectRequest projectRequest) throws CodeException {
+        Project project = getProjectById(projectId);
+        if (!getManager(projectId).getUserId().equals(managerId)) {
+            throw new CodeException("You do not have permission to do");
         }
-        if (projectRequest.getDescription() != null) {
-            project.setDescription(projectRequest.getDescription());
-        }
+        project.setName(projectRequest.getName());
+        project.setDescription(projectRequest.getDescription());
         return projectRepository.save(project);
     }
 
@@ -59,19 +62,20 @@ public class ProjectService {
                 .orElseThrow(() -> new CodeException("Project not found"));
     }
 
-    public User getManager(Integer projectId) throws CodeException {
-        Project project = getProjectById(projectId);
-        return project.getManager();
+    public User getManager(Integer projectId) {
+        return memberProjectRepository.findManagerIdByProjectId(projectId);
     }
 
-    public List<User> getMembers(Integer projectId) throws CodeException {
-        Project project = getProjectById(projectId);
-        return project.getMembers();
+    public List<User> getMembers(Integer projectId) {
+        return memberProjectRepository.findUserBytProjectId(projectId);
+    }
+
+    public List<User> getMembersNotManager(Integer projectId) {
+        return memberProjectRepository.findMemberNotManagerByProjectId(projectId);
     }
 
     public Project addMember(Integer projectId, Integer managerId, List<Integer> usersId) throws CodeException {
-        Project project = getProjectById(projectId);
-        if (!project.getManager().getUserId().equals(managerId)) {
+        if (!getManager(projectId).getUserId().equals(managerId)) {
             throw new CodeException("You do not have permission to do");
         }
         List<String> errors = new ArrayList<>();
@@ -79,8 +83,9 @@ public class ProjectService {
             User user;
             try {
                 user = userService.getUserById(userId);
-                if (!project.getMembers().contains(user)) {
-                    project.getMembers().add(user);
+                if (!getMembers(projectId).contains(user)) {
+                    MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
+                    memberProjectRepository.save(memberProject);
                 } else {
                     assert user != null;
                     errors.add("User " + user.getUsername() + " is already a member of the project");
@@ -91,31 +96,39 @@ public class ProjectService {
 
         });
         if (!errors.isEmpty()) {
-            projectRepository.save(project);
             throw new CodeException(String.join("; ", errors));
         }
-        return projectRepository.save(project);
+        return  getProjectById(projectId);
     }
 
     public void removeMember(Integer projectId, Integer managerId, Integer memberId) throws CodeException {
         if (memberId.equals(managerId)) {
             throw new CodeException("You cannot remove yourself from the project");
         }
+        if (!getManager(projectId).getUserId().equals(managerId)) {
+            throw new CodeException("You do not have permission to do this");
+        }
         Project project = getProjectById(projectId);
-        if (!project.getManager().getUserId().equals(managerId)) {
-            throw new CodeException("You do not have permission to do");
-        }
-        User member = userService.getUserById(memberId);
-        if (!project.getMembers().contains(member)) {
-            throw new CodeException("User " + member.getUsername() + " is not a member of the project");
-        }
-        project.getMembers().remove(member);
+        MemberProject memberProject = project.getMembers().stream()
+                .filter(mp -> mp.getUser().getUserId().equals(memberId))
+                .findFirst()
+                .orElseThrow(() -> new CodeException("User is not a member of the project"));
+        memberProject.getMemberTasks().forEach(memberTask -> {
+            try {
+                taskService.removeMember(memberTask.getTask().getTaskId(), memberId, managerId);
+            } catch (CodeException e) {
+                throw new RuntimeException(e.getMessage());
+            }
+        });
+        project.getMembers().remove(memberProject);
         projectRepository.save(project);
+        memberProjectRepository.delete(memberProject);
     }
+
 
     public void deleteProject(Integer projectId, Integer managerId) throws CodeException {
         Project project = getProjectById(projectId);
-        if (!project.getManager().getUserId().equals(managerId)) {
+        if (!getManager(projectId).getUserId().equals(managerId)) {
             throw new CodeException("You do not have permission to do");
         }
         projectRepository.delete(project);
@@ -173,6 +186,16 @@ public class ProjectService {
         long totalTasks = tasks.size();
         long completedTasks = getTaskCompleted(projectId).size();
         return (int) (completedTasks * 100 / totalTasks);
+    }
+
+    public ProjectResponse getProjectResponse(Project project)  {
+        User manager = getManager(project.getProjectId());
+        List<MemberProject> members = project.getMembers();
+        List<UserResponse> users = new ArrayList<>();
+        members.forEach(member -> users.add(UserResponse.fromEntity(member.getUser())));
+        List<TaskResponse> tasks = new ArrayList<>();
+        project.getTasks().forEach(task -> tasks.add(TaskResponse.fromEntity(task)));
+        return ProjectResponse.fromEntity(project, UserResponse.fromEntity(manager), users, tasks);
     }
 
 }

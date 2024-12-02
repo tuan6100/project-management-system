@@ -1,9 +1,7 @@
 package com.project.oop.PMS.dto;
 
-import com.project.oop.PMS.entity.Project;
 
-import com.project.oop.PMS.entity.Task;
-import com.project.oop.PMS.entity.User;
+import com.project.oop.PMS.entity.Project;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,40 +14,25 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProjectResponse {
+
     private Integer id;
     private String name;
     private String description;
     private UserResponse manager;
-    private List<UserResponse> members;
-    private List<TaskResponse> tasks;
+    private List<UserResponse> members = new ArrayList<>();
+    private List<TaskResponse> tasks = new ArrayList<>();
 
-
-    public static ProjectResponse fromEntity(Project project) {
+    public static ProjectResponse fromEntity(Project project, UserResponse manager,
+                                             List<UserResponse> members, List<TaskResponse> tasks) {
         ProjectResponse projectResponse = new ProjectResponse();
         projectResponse.setId(project.getProjectId());
         projectResponse.setName(project.getName());
         projectResponse.setDescription(project.getDescription());
-        if (project.getManager() != null) {
-            projectResponse.setManager(UserResponse.fromEntity(project.getManager()));
-        } else {
-            projectResponse.setManager(null);
-        }
-        List<UserResponse> userResponses = new ArrayList<>();
-        if (project.getMembers() != null) {
-            for (User member : project.getMembers()) {
-                userResponses.add(UserResponse.fromEntity(member));
-            }
-        }
-        projectResponse.setMembers(userResponses);
-        List<TaskResponse> taskResponses = new ArrayList<>();
-        if (project.getTasks() != null) {
-            for (Task task : project.getTasks()) {
-                taskResponses.add(TaskResponse.fromEntity(task));
-            }
-        }
-        projectResponse.setTasks(taskResponses);
+        projectResponse.setManager(manager);
+        projectResponse.setMembers(members);
+        projectResponse.setTasks(tasks);
         return projectResponse;
     }
-
-
 }
+
+

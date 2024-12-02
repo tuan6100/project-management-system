@@ -17,26 +17,21 @@ import lombok.ToString;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer userId;
+    protected Integer userId;
 
     @Column(name = "username", nullable = false, unique = true)
-    private String username;
+    protected String username;
 
     @Column(name = "password", nullable = false)
     @JsonIgnore
     private String password;
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    @JsonManagedReference("memberProject-user")
+    private List<MemberProject> memberProjects = new ArrayList<>();
 
-    @OneToMany(mappedBy = "manager")
-    private List<Project> managerProjects = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "members", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
-    @ToString.Exclude
-    private List<Project> memberProjects = new ArrayList<>();
-
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
     @JsonManagedReference("user-memberTask")
     private List<MemberTask> memberTasks = new ArrayList<>();
-
 
 }

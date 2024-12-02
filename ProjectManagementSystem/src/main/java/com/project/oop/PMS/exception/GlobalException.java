@@ -13,7 +13,7 @@ public class GlobalException {
 
     @ExceptionHandler(CodeException.class)
     public ResponseEntity<ErrorDetail> accountExceptionHandler(CodeException e, WebRequest request) {
-        ErrorDetail err = new ErrorDetail("Account Error", e.getMessage(), LocalDateTime.now());
+        ErrorDetail err = new ErrorDetail("Project Error", e.getMessage(), LocalDateTime.now());
         return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
     }
 
