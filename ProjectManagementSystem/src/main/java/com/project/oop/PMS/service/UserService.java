@@ -39,11 +39,8 @@ public class UserService {
     }
 
     public User getUserByAuth(String username, String password) throws CodeException {
-        User user =  userRepository.findByUsernameAndPassword(username, password);
-        if (user == null) {
-            throw new CodeException("User not found");
-        }
-        return user;
+         return userRepository.findByUsernameAndPassword(username, password);
+
     }
     
     public User register(String username, String password) throws CodeException {
