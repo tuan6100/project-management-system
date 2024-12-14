@@ -6,6 +6,7 @@ import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.ProjectRepository;
+import com.project.oop.PMS.repository.TaskRepository;
 import com.project.oop.PMS.service.ProjectService;
 
 import jakarta.transaction.Transactional;
@@ -26,6 +27,9 @@ public class ProjectServiceImplementTrung implements ProjectService {
 
     @Autowired
     private MemberProjectRepository memberProjectRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
 
     @Autowired
     @Lazy
@@ -57,10 +61,50 @@ public class ProjectServiceImplementTrung implements ProjectService {
         return projectRepository.save(project);
     }
 
+    @Override
     public Project getProjectById(Integer projectId) throws CodeException {
-        return projectRepository.findById(projectId)
-                .orElseThrow(() -> new CodeException("Project not found"));
+        return null;
     }
+
+    public ProjectResponseForProjectDetails getProjectDetail(Integer projectId) throws CodeException {
+        // Lấy thông tin Project từ database
+        Project project = projectRepository.findByProjectId(projectId);
+        if (project == null) {
+            throw new CodeException("Project not found with ID: " + projectId);
+        }
+
+        // Lấy thông tin Manager
+        User manager = memberProjectRepository.findManagerIdByProjectId(projectId);
+        if (manager == null) {
+            throw new CodeException("Manager not found for project ID: " + projectId);
+        }
+        UserResponse managerResponse = new UserResponse(manager.getUserId(), manager.getUsername());
+
+        // Lấy các Members (ngoại trừ Manager)
+        List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
+        List<UserResponse> memberResponses = members.stream()
+                .map(member -> new UserResponse(member.getUser().getUserId(), member.getUser().getUsername()))
+                .toList();
+
+        // Tính toán số lượng task và tiến độ
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        int totalTasks = tasks.size();  // Số lượng task
+        long completedTasks = tasks.stream().filter(task -> task.getStatus() == Task.TaskStatus.completed).count();
+        int inProgressTasks = (int) tasks.stream().filter(task -> task.getStatus() == Task.TaskStatus.in_progress).count();
+        double progress = totalTasks > 0 ? (double) completedTasks / totalTasks : 0.0;
+
+        // Tạo và trả về ProjectResponse mà không có danh sách task
+        return ProjectResponseForProjectDetails.fromEntity(
+                project,
+                managerResponse,
+                memberResponses, // Truyền danh sách UserResponse cho thành viên
+                totalTasks,         // Số lượng task
+                inProgressTasks,    // Số lượng task đang trong tiến trình
+                progress            // Tiến độ dự án
+        );
+    }
+
+
 
     public User getManager(Integer projectId) {
         return memberProjectRepository.findManagerIdByProjectId(projectId);

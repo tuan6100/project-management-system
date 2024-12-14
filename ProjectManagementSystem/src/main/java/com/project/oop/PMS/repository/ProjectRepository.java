@@ -22,8 +22,8 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
 	Optional<Project> findByName(String projectName);
 
-
-	
+    @Query("SELECT p FROM Project p WHERE p.projectId = ?1")
+    Project findByProjectId(Integer id);
 //	 @Query(value = "SELECT p.* FROM projects p " +
 //             "JOIN member_project mp ON p.id = mp.project_id " +
 //             "WHERE mp.user_id = :user_id", nativeQuery = true)
