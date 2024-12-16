@@ -3,11 +3,13 @@ package com.project.oop.PMS.controller;
 import com.project.oop.PMS.dto.GetAllMemberForProjectResponse;
 import com.project.oop.PMS.dto.ProjectRequest;
 import com.project.oop.PMS.dto.ProjectResponse;
+import com.project.oop.PMS.dto.ProjectResponseForProjectDetails;
 import com.project.oop.PMS.entity.MemberProject;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.service.implement.ProjectServiceImplement;
+import com.project.oop.PMS.service.implement.ProjectServiceImplementTrung;
 import com.project.oop.PMS.service.implement.UserServiceImplement;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class ProjectController {
     @Autowired
     private UserServiceImplement userService;
 
+    @Autowired
+    private ProjectServiceImplementTrung projectServiceTrung;
+
     @PostMapping("/add/{managerId}")
     public ResponseEntity<ProjectResponse> addProject(@RequestBody ProjectRequest request, @PathVariable Integer managerId) throws CodeException {
         Project project = projectService.createProject(request, managerId);
@@ -35,10 +40,11 @@ public class ProjectController {
     }
 
     @GetMapping("/{projectId}/details")
-    public ResponseEntity<ProjectResponse> getProjectInfo(@PathVariable Integer projectId) throws CodeException {
-        Project project = projectService.getProjectById(projectId);
-        return ResponseEntity.ok(projectService.getProjectResponse(project));
+    public ResponseEntity<ProjectResponseForProjectDetails> getProjectInfo(@PathVariable Integer projectId) throws CodeException {
+        ProjectResponseForProjectDetails projectDetails = projectServiceTrung.getProjectDetail(projectId);
+        return ResponseEntity.ok(projectDetails);
     }
+
     @GetMapping("/{userId}/{projectId}/members")
     public ResponseEntity<List<GetAllMemberForProjectResponse>> getProjectMembers(@PathVariable Integer projectId, @PathVariable Integer userId) throws CodeException {
         User user = userService.getUserById(userId);

@@ -46,9 +46,11 @@ public class Task {
     public enum TaskStatus {
         pending,
         in_progress,
-        completed,
-        overdue
+        completed
     }
+
+    @Column(name = "is_overdue")
+    private Boolean isOverdue;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference("task-memberTask")
