@@ -4,19 +4,20 @@ import com.project.oop.PMS.dto.GetAllMemberForProjectResponse;
 import com.project.oop.PMS.dto.ProjectRequest;
 import com.project.oop.PMS.dto.ProjectResponse;
 import com.project.oop.PMS.dto.ProjectResponseForProjectDetails;
-import com.project.oop.PMS.entity.MemberProject;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.exception.CodeException;
+import com.project.oop.PMS.service.ProjectService;
 import com.project.oop.PMS.service.implement.ProjectServiceImplement;
+import com.project.oop.PMS.service.implement.ProjectServiceImplementTA;
 import com.project.oop.PMS.service.implement.ProjectServiceImplementTrung;
 import com.project.oop.PMS.service.implement.UserServiceImplement;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,8 +25,10 @@ import java.util.Map;
 @RequestMapping("/api/projects")
 public class ProjectController {
 
+
+    @Qualifier("projectServiceImplement")
     @Autowired
-    private ProjectServiceImplement projectService;
+    private ProjectService projectService = new ProjectServiceImplement();
 
     @Autowired
     private UserServiceImplement userService;
@@ -49,13 +52,18 @@ public class ProjectController {
     public ResponseEntity<List<GetAllMemberForProjectResponse>> getProjectMembers(@PathVariable Integer projectId, @PathVariable Integer userId) throws CodeException {
         User user = userService.getUserById(userId);
         Project project = projectService.getProjectById(projectId);
-        boolean isMember = projectService.isMemberOfProject(user, project);
-        if (isMember) {
-            List<GetAllMemberForProjectResponse> memberProjects = projectService.getMembers(projectId);
-            return ResponseEntity.ok(memberProjects);
-        } else {
+//        boolean isMember = projectService.isMemberOfProject(user, project);
+//        if (isMember) {
+//            List<GetAllMemberForProjectResponse> memberProjects = projectService.getMembers(projectId);
+//            return ResponseEntity.ok(memberProjects);
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+        List<GetAllMemberForProjectResponse> memberProjects = projectService.getMembers(userId, projectId);
+        if (memberProjects == null) {
             return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(memberProjects);
     }
 
     @PostMapping("/{projectId}/member/add/{managerId}")
@@ -94,9 +102,5 @@ public class ProjectController {
         projectService.deleteProject(projectId, managerId);
         return ResponseEntity.ok(Map.of("message", "Project deleted successfully"));
     }
-
-
-
-
 
 }
