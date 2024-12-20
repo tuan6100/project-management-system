@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@CrossOrigin(origins = "https://pms.daokiencuong.id.vn")
 @RestController
 @RequestMapping("/api/projects")
 public class ProjectController {

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@CrossOrigin(origins = "https://pms.daokiencuong.id.vn")
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
