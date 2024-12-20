@@ -4,11 +4,9 @@ import com.project.oop.PMS.dto.*;
 import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
-import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.ProjectRepository;
 import com.project.oop.PMS.service.ProjectService;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -66,7 +64,20 @@ public class ProjectServiceImplement implements ProjectService {
         return memberProjectRepository.findManagerIdByProjectId(projectId);
     }
 
-    public List<GetAllMemberForProjectResponse> getMembers(Integer projectId) {
+    @Override
+    public List<Integer> getMembersIdOfProject(Integer projectId) {
+        List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
+        List<Integer> usersId = new ArrayList<>();
+        for(MemberProject member : members) {
+            usersId.add(member.getUser().getUserId());
+        }
+        return usersId;
+    }
+
+    public List<GetAllMemberForProjectResponse> getMembers(Integer userId, Integer projectId) {
+        if (!getMembersIdOfProject(projectId).contains(userId)) {
+            return null;
+        }
         List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
         List<GetAllMemberForProjectResponse> users = new ArrayList<>();
         for(MemberProject member : members) {
@@ -91,7 +102,7 @@ public class ProjectServiceImplement implements ProjectService {
             User user;
             try {
                 user = userService.getUserById(userId);
-                if (!getMembers(projectId).contains(user)) {
+                if (!getMembersIdOfProject(projectId).contains(userId)) {
                     MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
                     memberProjectRepository.save(memberProject);
                 } else {

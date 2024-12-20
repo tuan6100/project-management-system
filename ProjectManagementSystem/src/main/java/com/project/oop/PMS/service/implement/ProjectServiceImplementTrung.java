@@ -4,12 +4,10 @@ import com.project.oop.PMS.dto.*;
 import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
-import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.ProjectRepository;
 import com.project.oop.PMS.repository.TaskRepository;
 import com.project.oop.PMS.service.ProjectService;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -110,7 +108,12 @@ public class ProjectServiceImplementTrung implements ProjectService {
         return memberProjectRepository.findManagerIdByProjectId(projectId);
     }
 
-    public List<GetAllMemberForProjectResponse> getMembers(Integer projectId) {
+    @Override
+    public List<Integer> getMembersIdOfProject(Integer projectId) {
+        return List.of();
+    }
+
+    public List<GetAllMemberForProjectResponse> getMembers(Integer userId, Integer projectId) {
         List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
         List<GetAllMemberForProjectResponse> users = new ArrayList<>();
         for(MemberProject member : members) {
@@ -127,29 +130,29 @@ public class ProjectServiceImplementTrung implements ProjectService {
     }
 
     public Project addMember(Integer projectId, Integer managerId, List<Integer> usersId) throws CodeException {
-        if (!getManager(projectId).getUserId().equals(managerId)) {
-            throw new CodeException("You do not have permission to do");
-        }
-        List<String> errors = new ArrayList<>();
-        usersId.forEach(userId -> {
-            User user;
-            try {
-                user = userService.getUserById(userId);
-                if (!getMembers(projectId).contains(user)) {
-                    MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
-                    memberProjectRepository.save(memberProject);
-                } else {
-                    assert user != null;
-                    errors.add("User " + user.getUsername() + " is already a member of the project");
-                }
-            } catch (CodeException e) {
-                errors.add(e.getMessage());
-            }
-
-        });
-        if (!errors.isEmpty()) {
-            throw new CodeException(String.join("; ", errors));
-        }
+//        if (!getManager(projectId).getUserId().equals(managerId)) {
+//            throw new CodeException("You do not have permission to do");
+//        }
+//        List<String> errors = new ArrayList<>();
+//        usersId.forEach(userId -> {
+//            User user;
+//            try {
+//                user = userService.getUserById(userId);
+//                if (!getMembers(, projectId).contains(user)) {
+//                    MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
+//                    memberProjectRepository.save(memberProject);
+//                } else {
+//                    assert user != null;
+//                    errors.add("User " + user.getUsername() + " is already a member of the project");
+//                }
+//            } catch (CodeException e) {
+//                errors.add(e.getMessage());
+//            }
+//
+//        });
+//        if (!errors.isEmpty()) {
+//            throw new CodeException(String.join("; ", errors));
+//        }
         return  getProjectById(projectId);
     }
 
