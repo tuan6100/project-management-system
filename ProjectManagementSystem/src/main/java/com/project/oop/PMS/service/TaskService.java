@@ -12,5 +12,5 @@ public interface TaskService {
 	public Task createTask(TaskRequest taskRequest, Integer projectId, Integer managerId) throws CodeException;
 	public String assignMember(Integer taskId, Integer memberId, Integer managerId) throws CodeException;
 	public String removeMember(Integer taskId, Integer memberId, Integer managerId) throws CodeException;
-	 public List<User> getMembers(Integer taskId);
+	public List<User> getMembers(Integer taskId);
 }

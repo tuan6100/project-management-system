@@ -17,6 +17,7 @@ public class TaskResponse {
     private Integer projectId;
     private Integer taskId;
     private String title;
+    private String description;
     private String dueDate;
     private String status;
     private List<MemberTaskResponse> members = new ArrayList<>();
@@ -26,6 +27,7 @@ public class TaskResponse {
         taskResponse.setProjectId(task.getProject().getProjectId());
         taskResponse.setTaskId(task.getTaskId());
         taskResponse.setTitle(task.getTitle());
+        taskResponse.setDescription(task.getDescription());
         taskResponse.setDueDate(task.getDueDate().toString());
         taskResponse.setStatus(task.getStatus().toString());
         List<MemberTask> memberTasks = task.getMemberTasks();

@@ -6,9 +6,11 @@ import com.project.oop.PMS.dto.TaskResponseForGetAll;
 import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.service.implement.ProjectServiceImplement;
+import com.project.oop.PMS.service.implement.ProjectServiceImplementTrung;
 import com.project.oop.PMS.service.implement.TaskServiceImplement;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +25,8 @@ public class TaskController {
     private TaskServiceImplement taskService;
     @Autowired
     private ProjectServiceImplement projectService;
+    @Autowired
+    private ProjectServiceImplementTrung projectServiceTrung;
 
 
     @GetMapping
@@ -50,10 +54,10 @@ public class TaskController {
         return ResponseEntity.ok().body(TaskResponse.fromEntity(taskService.getTaskById(taskId)));
     }
 
-    @PutMapping("{taskId}/complete/{memberId}")
-    public ResponseEntity<TaskResponse> completeTask(@PathVariable Integer taskId, @PathVariable Integer memberId) throws CodeException {
-        return ResponseEntity.ok().body(TaskResponse.fromEntity(taskService.completeTask(taskId, memberId)));
-    }
+//    @PutMapping("{taskId}/complete/{memberId}")
+//    public ResponseEntity<TaskResponse> completeTask(@PathVariable Integer taskId, @PathVariable Integer memberId) throws CodeException {
+//        return ResponseEntity.ok().body(TaskResponse.fromEntity(taskService.completeTask(taskId, memberId)));
+//    }
 
     @PutMapping("{taskId}/update/{managerId}/{memberId}")
     public ResponseEntity<TaskResponse> updateTask(@PathVariable Integer taskId, @RequestBody TaskRequest taskRequest, @PathVariable Integer managerId) throws CodeException {
@@ -70,4 +74,17 @@ public class TaskController {
         taskService.deleteTask(taskId, managerId);
         return ResponseEntity.ok("Task deleted successfully");
     }
+
+    @PutMapping("/{taskId}/{memberId}/complete")
+    public ResponseEntity<String> updateComplete(
+            @PathVariable Integer taskId,
+            @PathVariable Integer memberId) {
+        try {
+            projectServiceTrung.updateCompleteTask(taskId, memberId);
+            return ResponseEntity.ok("Update completed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update task completion: " + e.getMessage());
+        }
+    }
+
 }
