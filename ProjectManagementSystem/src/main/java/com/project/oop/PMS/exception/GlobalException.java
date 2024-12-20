@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalException {
 
-    @ExceptionHandler(ProjectException.class)
-    public ResponseEntity<ErrorMessage> projectExceptionHandler(ProjectException e) {
+    @ExceptionHandler(CodeException.class)
+    public ResponseEntity<ErrorMessage> projectExceptionHandler(CodeException e) {
         ErrorMessage err = new ErrorMessage(e.getMessage());
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
