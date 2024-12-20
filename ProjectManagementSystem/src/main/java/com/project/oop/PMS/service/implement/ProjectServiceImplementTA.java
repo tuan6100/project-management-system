@@ -90,7 +90,14 @@ public class ProjectServiceImplementTA implements ProjectService {
         }
         return users;
     }
-
+    public List<GetAllMemberForProjectResponse> getMembers(Integer projectId) {
+        List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
+        List<GetAllMemberForProjectResponse> users = new ArrayList<>();
+        for(MemberProject member : members) {
+            users.add(GetAllMemberForProjectResponse.fromEntity(member));
+        }
+        return users;
+    }
     public List<User> getMembersNotManager(Integer projectId) {
         return memberProjectRepository.findMemberNotManagerByProjectId(projectId);
     }

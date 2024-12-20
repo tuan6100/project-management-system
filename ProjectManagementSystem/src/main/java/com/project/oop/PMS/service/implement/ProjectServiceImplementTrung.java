@@ -70,7 +70,8 @@ public class ProjectServiceImplementTrung implements ProjectService {
 
     @Override
     public Project getProjectById(Integer projectId) throws CodeException {
-        return null;
+        return projectRepository.findById(projectId)
+                .orElseThrow(() -> new CodeException("Project not found"));
     }
 
     public ProjectResponseForProjectDetails getProjectDetail(Integer projectId) throws CodeException {
@@ -123,6 +124,14 @@ public class ProjectServiceImplementTrung implements ProjectService {
     }
 
     public List<GetAllMemberForProjectResponse> getMembers(Integer userId, Integer projectId) {
+        List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
+        List<GetAllMemberForProjectResponse> users = new ArrayList<>();
+        for(MemberProject member : members) {
+            users.add(GetAllMemberForProjectResponse.fromEntity(member));
+        }
+        return users;
+    }
+    public List<GetAllMemberForProjectResponse> getMembers(Integer projectId) {
         List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
         List<GetAllMemberForProjectResponse> users = new ArrayList<>();
         for(MemberProject member : members) {

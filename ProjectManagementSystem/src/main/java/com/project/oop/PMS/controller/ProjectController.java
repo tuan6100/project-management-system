@@ -72,8 +72,8 @@ public class ProjectController {
                                                       @PathVariable Integer managerId,
                                                       @RequestBody List<String> newMembers
                                                       ) throws CodeException {
-        Project project = projectService.addMember(projectId, managerId, newMembers);
-        return ResponseEntity.ok(projectService.getProjectResponse(project));
+        Project project = projectServiceTrung.addMember(projectId, managerId, newMembers);
+        return ResponseEntity.ok(projectServiceTrung.getProjectResponse(project));
     }
 
     @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberId}")
