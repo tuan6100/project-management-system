@@ -5,6 +5,7 @@ import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.ProjectRepository;
+import com.project.oop.PMS.repository.UserRepository;
 import com.project.oop.PMS.service.ProjectService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,9 @@ public class ProjectServiceImplementTA implements ProjectService {
 
     @Autowired
     private MemberProjectRepository memberProjectRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     @Lazy
@@ -91,31 +95,40 @@ public class ProjectServiceImplementTA implements ProjectService {
         return memberProjectRepository.findMemberNotManagerByProjectId(projectId);
     }
 
-    public Project addMember(Integer projectId, Integer managerId, List<Integer> usersId) throws CodeException {
+    @Override
+    public Project addMember(Integer projectId, Integer managerId, List<String> userNames) throws CodeException {
         if (!getManager(projectId).getUserId().equals(managerId)) {
             throw new CodeException("You do not have permission to do");
         }
+
         List<String> errors = new ArrayList<>();
-        usersId.forEach(userId -> {
-            User user;
+
+        // Duyệt qua danh sách tên người dùng
+        for (String userName : userNames) {
             try {
-                user = userService.getUserById(userId);
-                if (!getMembersIdOfProject(projectId).contains(userId)) {
+
+                // Lấy đối tượng User từ tên người dùng
+                User user = userRepository.findByUserName(userName);
+
+                // Kiểm tra nếu người dùng chưa là thành viên
+                if (!getMembers(projectId).contains(user)) {
+
                     MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
                     memberProjectRepository.save(memberProject);
                 } else {
-                    assert user != null;
-                    errors.add("User " + user.getUsername() + " is already a member of the project");
+                    errors.add("User " + userName + " is already a member of the project");
                 }
             } catch (CodeException e) {
-                errors.add(e.getMessage());
+                errors.add("Error with user " + userName + ": " + e.getMessage());
             }
+        }
 
-        });
+        // Nếu có lỗi thì ném ra exception
         if (!errors.isEmpty()) {
             throw new CodeException(String.join("; ", errors));
         }
-        return  getProjectById(projectId);
+
+        return getProjectById(projectId);
     }
 
     public void removeMember(Integer projectId, Integer managerId, Integer memberId) throws CodeException {
