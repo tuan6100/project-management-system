@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8081")
+@CrossOrigin(origins = "https://pms.daokiencuong.id.vn")
 @RequestMapping("api/auth")
 public class AuthController {
 

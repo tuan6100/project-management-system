@@ -4,22 +4,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
-
-import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalException {
 
     @ExceptionHandler(CodeException.class)
-    public ResponseEntity<ErrorDetail> accountExceptionHandler(CodeException e, WebRequest request) {
-        ErrorDetail err = new ErrorDetail("Project Error", e.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(err, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ErrorMessage> projectExceptionHandler(CodeException e) {
+        ErrorMessage err = new ErrorMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetail> otherExceptionHandler(Exception e, WebRequest request) {
-        ErrorDetail err = new ErrorDetail("Internal Server Error", e.getMessage(), LocalDateTime.now());
-        return new ResponseEntity<>(err, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ErrorMessage> otherExceptionHandler(Exception e) {
+        ErrorMessage err = new ErrorMessage(e.getMessage());
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(err);
     }
 }
