@@ -127,33 +127,40 @@ public class ProjectServiceImplementTrung implements ProjectService {
     public List<User> getMembersNotManager(Integer projectId) {
         return memberProjectRepository.findMemberNotManagerByProjectId(projectId);
     }
-
-    public Project addMember(Integer projectId, Integer managerId, List<Integer> usersId) throws CodeException {
+    @Override
+    public Project addMember(Integer projectId, Integer managerId, List<String> userNames) throws CodeException {
         if (!getManager(projectId).getUserId().equals(managerId)) {
             throw new CodeException("You do not have permission to do");
         }
+
         List<String> errors = new ArrayList<>();
-        usersId.forEach(userId -> {
-            User user;
+
+        // Duyệt qua danh sách tên người dùng
+        for (String userName : userNames) {
             try {
-                user = userService.getUserById(userId);
+                // Lấy đối tượng User từ tên người dùng
+                User user = userRepository.findByUserName(userName);
+
+                // Kiểm tra nếu người dùng chưa là thành viên
                 if (!getMembers(projectId).contains(user)) {
                     MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
                     memberProjectRepository.save(memberProject);
                 } else {
-                    assert user != null;
-                    errors.add("User " + user.getUsername() + " is already a member of the project");
+                    errors.add("User " + userName + " is already a member of the project");
                 }
             } catch (CodeException e) {
-                errors.add(e.getMessage());
+                errors.add("Error with user " + userName + ": " + e.getMessage());
             }
+        }
 
-        });
+        // Nếu có lỗi thì ném ra exception
         if (!errors.isEmpty()) {
             throw new CodeException(String.join("; ", errors));
         }
-        return  getProjectById(projectId);
+
+        return getProjectById(projectId);
     }
+
 
     public void removeMember(Integer projectId, Integer managerId, Integer memberId) throws CodeException {
         if (memberId.equals(managerId)) {
@@ -264,15 +271,33 @@ public class ProjectServiceImplementTrung implements ProjectService {
     }
 
 
-    public List<TaskResponseForGetAll> getAllTaskOfMember(Integer memberId) throws CodeException {
-        List<TaskResponseForGetAll> taskResponses = new ArrayList<>();
+    public List<TaskResponseForGetAllOfMember> getAllTaskOfMember(Integer memberId) throws CodeException {
+        List<TaskResponseForGetAllOfMember> taskResponses = new ArrayList<>();
+
+        // Lấy danh sách Task từ MemberTask
         List<Task> listTask = memberTaskRepository.getTasksByUserId(memberId);
+
         for (Task task : listTask) {
-            taskResponses.add(TaskResponseForGetAll.fromEntity(task));
+            // Lấy thông tin Project của Task
+            Project project = task.getProject();
+            if (project == null) {
+                throw new CodeException("Project not found for task with ID: " + task.getTaskId());
+            }
+
+            // Tìm Manager của Project
+            User manager = memberProjectRepository.findManagerIdByProjectId(project.getProjectId());
+            if (manager == null) {
+                throw new CodeException("Manager not found for project with ID: " + project.getProjectId());
+            }
+
+            // Chuyển đổi sang DTO
+            TaskResponseForGetAllOfMember taskResponse = TaskResponseForGetAllOfMember.fromEntity(task, project, manager);
+            taskResponses.add(taskResponse);
         }
 
         return taskResponses;
     }
+
 
     public List<TaskResponse> getTaskOverdue(Integer projectId) throws CodeException {
         Project project = getProjectById(projectId);

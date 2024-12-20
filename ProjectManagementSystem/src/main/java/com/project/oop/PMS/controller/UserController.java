@@ -27,8 +27,8 @@ public class UserController {
         return ResponseEntity.ok(projects);
     }
     @GetMapping("/{memberId}/tasks")
-    public ResponseEntity<List<TaskResponseForGetAll>> getAllTaskOfMember(@PathVariable Integer memberId) throws CodeException {
-        List<TaskResponseForGetAll> taskResponses = projectService.getAllTaskOfMember(memberId);
+    public ResponseEntity<List<TaskResponseForGetAllOfMember>> getAllTaskOfMember(@PathVariable Integer memberId) throws CodeException {
+        List<TaskResponseForGetAllOfMember> taskResponses = projectService.getAllTaskOfMember(memberId);
         return ResponseEntity.ok(taskResponses);
     }
 
