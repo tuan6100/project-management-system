@@ -91,4 +91,17 @@ public class NotificationServiceImplement implements NotificationService {
         // Lưu thông báo vào cơ sở dữ liệu
         return notificationRepository.save(taskNotification);
     }
+    @Override
+    public void markAsRead(Integer notificationId) throws CodeException {
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CodeException("Notification not found"));
+
+        if (notification.getIsRead()) {
+            throw new CodeException("Notification is already marked as read");
+        }
+
+        notification.setIsRead(true);
+        notificationRepository.save(notification);
+    }
+    
 }
