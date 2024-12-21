@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/projects/{projectId}/tasks/{taskId}/comments")
@@ -23,7 +24,8 @@ public class CommentController {
 
 
     @PostMapping("/create/{userId}")
-    public ResponseEntity<CommentResponse> createComment(@RequestBody String comment, @PathVariable Integer projectId, @PathVariable Integer taskId, @PathVariable Integer userId) throws CodeException, CodeException {
+    public ResponseEntity<CommentResponse> createComment(@RequestBody Map<String, String> commentRequest, @PathVariable Integer projectId, @PathVariable Integer taskId, @PathVariable Integer userId) throws CodeException, CodeException {
+        String comment = commentRequest.get("comment");
         return ResponseEntity.ok().body(CommentResponse.fromEntity(commentService.addComment(taskId, userId, comment)));
     }
 
@@ -35,7 +37,8 @@ public class CommentController {
     }
 
     @PutMapping("{commentId}/edit/{userId}")
-    public ResponseEntity<CommentResponse> editComment(@RequestBody String comment, @PathVariable Integer commentId, @PathVariable Integer userId) throws CodeException {
+    public ResponseEntity<CommentResponse> editComment(@RequestBody Map<String, String> commentRequest, @PathVariable Integer commentId, @PathVariable Integer userId) throws CodeException {
+        String comment = commentRequest.get("comment");
         return ResponseEntity.ok().body(CommentResponse.fromEntity(commentService.editComment(commentId, userId, comment)));
     }
 
