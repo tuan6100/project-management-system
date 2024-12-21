@@ -62,7 +62,7 @@ public class TaskServiceImplement implements TaskService {
         if (!projectService.getManager(project.getProjectId()).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
-        if ((projectService.getMembersIdOfProject(project.getProjectId()).contains(memberId))) {
+        if (!(projectService.getMembersIdOfProject(project.getProjectId()).contains(memberId))) {
             throw new CodeException("User is not a member of this project");
         }
         if (task.getMemberTasks().stream().anyMatch(mt -> mt.getMember().getUserId().equals(memberId))) {
