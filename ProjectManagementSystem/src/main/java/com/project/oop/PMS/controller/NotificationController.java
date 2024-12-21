@@ -4,6 +4,8 @@ import com.project.oop.PMS.entity.Notification;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,5 +38,14 @@ public class NotificationController {
     @GetMapping("/user/{userId}")
     public List<Notification> getNotificationsByUser(@PathVariable Integer userId) {
         return notificationService.getAllNotificationsForUser(userId);
+    }
+    @PatchMapping("/{notificationId}/read")
+    public ResponseEntity<String> markNotificationAsRead(@PathVariable Integer notificationId) {
+        try {
+            notificationService.markAsRead(notificationId);
+            return ResponseEntity.ok("Notification marked as read successfully");
+        } catch (CodeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 }

@@ -11,7 +11,7 @@ public interface NotificationService {
     Notification createProjectInvitation(Integer userId, Integer projectId, String message);
 
     String handleNotificationAction(Integer notificationId, String action) throws CodeException;
-
+    void markAsRead(Integer notificationId) throws CodeException;
    
 
 	List<Notification> getAllNotificationsForUser(Integer userId);
