@@ -6,7 +6,6 @@ import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.TaskRepository;
-import com.project.oop.PMS.service.NotificationService;
 import com.project.oop.PMS.service.TaskService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,6 @@ public class TaskServiceImplement implements TaskService {
     @Autowired
     @Lazy
     private UserServiceImplement userService;
-    @Autowired
-    private NotificationService notificationService;
 
 
     public Task getTaskById(Integer taskId) throws CodeException {
@@ -62,7 +59,7 @@ public class TaskServiceImplement implements TaskService {
         if (!projectService.getManager(project.getProjectId()).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
-        if ((projectService.getMembersIdOfProject(project.getProjectId()).contains(memberId))) {
+        if ((projectService.getMembers(project.getProjectId()).contains(userService.getUserById(memberId)))) {
             throw new CodeException("User is not a member of this project");
         }
         if (task.getMemberTasks().stream().anyMatch(mt -> mt.getMember().getUserId().equals(memberId))) {
@@ -77,14 +74,6 @@ public class TaskServiceImplement implements TaskService {
         memberTaskRepository.save(memberTask);
         task.getMemberTasks().add(memberTask);
         taskRepository.save(task);
-     // Tạo thông báo
-        String message = "You have been assigned to the task: " + task.getTitle();
-        notificationService.createTaskAssignmentNotification(
-            memberId,           // ID của người nhận thông báo
-            taskId,             // ID của task
-            task.getTitle(),    // Tiêu đề task
-            message             // Nội dung thông báo
-        );
         return "Member " + userService.getUserById(memberId).getUsername() + " assigned to task " + task.getTitle();
     }
 

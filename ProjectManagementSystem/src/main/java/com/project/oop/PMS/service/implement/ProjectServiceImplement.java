@@ -4,10 +4,12 @@ import com.project.oop.PMS.dto.*;
 import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
+import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.ProjectRepository;
 import com.project.oop.PMS.repository.UserRepository;
 import com.project.oop.PMS.service.ProjectService;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -68,20 +70,7 @@ public class ProjectServiceImplement implements ProjectService {
         return memberProjectRepository.findManagerIdByProjectId(projectId);
     }
 
-    @Override
-    public List<Integer> getMembersIdOfProject(Integer projectId) {
-        List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
-        List<Integer> usersId = new ArrayList<>();
-        for(MemberProject member : members) {
-            usersId.add(member.getUser().getUserId());
-        }
-        return usersId;
-    }
-
-    public List<GetAllMemberForProjectResponse> getMembers(Integer userId, Integer projectId) {
-        if (!getMembersIdOfProject(projectId).contains(userId)) {
-            return null;
-        }
+    public List<GetAllMemberForProjectResponse> getMembers(Integer projectId) {
         List<MemberProject> members = memberProjectRepository.findMemberProjectsByProjectId(projectId);
         List<GetAllMemberForProjectResponse> users = new ArrayList<>();
         for(MemberProject member : members) {
@@ -98,28 +87,44 @@ public class ProjectServiceImplement implements ProjectService {
     }
     @Override
     public Project addMember(Integer projectId, Integer managerId, List<String> userNames) throws CodeException {
+        // Kiểm tra quyền của manager
         if (!getManager(projectId).getUserId().equals(managerId)) {
-            throw new CodeException("You do not have permission to do");
+            throw new CodeException("You do not have permission to perform this action");
         }
 
         List<String> errors = new ArrayList<>();
 
+        // Lấy danh sách thành viên hiện tại của project
+        List<GetAllMemberForProjectResponse> currentMembers = getMembers(projectId);
+        if (currentMembers == null) {
+            throw new CodeException("Cannot retrieve members for project ID " + projectId);
+        }
+
         // Duyệt qua danh sách tên người dùng
         for (String userName : userNames) {
             try {
-
                 // Lấy đối tượng User từ tên người dùng
                 User user = userRepository.findByUserName(userName);
 
-                // Kiểm tra nếu người dùng chưa là thành viên
-                if (!getMembers(projectId).contains(user)) {
-
-                    MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
-                    memberProjectRepository.save(memberProject);
-                } else {
-                    errors.add("User " + userName + " is already a member of the project");
+                if (user == null) {
+                    errors.add("User " + userName + " does not exist");
+                    continue;
                 }
-            } catch (CodeException e) {
+
+                // Kiểm tra nếu người dùng đã là thành viên
+                boolean isAlreadyMember = currentMembers.stream()
+                        .anyMatch(member -> member.getUserId().equals(user.getUserId()));
+
+                if (isAlreadyMember) {
+                    errors.add("User " + userName + " is already a member of the project");
+                    continue;
+                }
+
+                // Thêm thành viên mới với role là "member"
+                MemberProject memberProject = new MemberProject(user, getProjectById(projectId), "Member");
+                memberProjectRepository.save(memberProject);
+
+            } catch (Exception e) {
                 errors.add("Error with user " + userName + ": " + e.getMessage());
             }
         }
