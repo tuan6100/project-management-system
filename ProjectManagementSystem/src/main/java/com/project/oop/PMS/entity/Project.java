@@ -23,7 +23,7 @@ public class Project {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "createDate")
+    @Column(name = "create_date")
     private Date createDate;
     @OneToMany(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference

@@ -57,7 +57,7 @@ public class Task {
     @JsonManagedReference("task-memberTask")
     private List<MemberTask> memberTasks = new ArrayList<>();
 
-    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
 }
