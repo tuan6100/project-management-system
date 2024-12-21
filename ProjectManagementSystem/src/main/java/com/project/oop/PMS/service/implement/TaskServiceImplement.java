@@ -1,19 +1,21 @@
 package com.project.oop.PMS.service.implement;
 
+import com.project.oop.PMS.dto.RateReport;
 import com.project.oop.PMS.dto.TaskRequest;
+import com.project.oop.PMS.dto.TaskResponseForGetAll;
 import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.TaskRepository;
+import com.project.oop.PMS.repository.UserRepository;
 import com.project.oop.PMS.service.TaskService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class TaskServiceImplement implements TaskService {
@@ -34,6 +36,8 @@ public class TaskServiceImplement implements TaskService {
     @Autowired
     @Lazy
     private UserServiceImplement userService;
+    @Autowired
+    private UserRepository userRepository;
 
 
     public Task getTaskById(Integer taskId) throws CodeException {
@@ -132,15 +136,15 @@ public class TaskServiceImplement implements TaskService {
         return task.getDueDate().after(new Date()) && memberTask.getIs_completed();
     }
 
-    public Boolean isOverdue(Integer taskId, Integer memberId) throws CodeException {
-        Task task = getTaskById(taskId);
-        User user = userService.getUserById(memberId);
-        if (user.getUserId().equals((memberId))) {
-            throw new CodeException("User is not a member of this project");
+        public Boolean isOverdue(Integer taskId, Integer memberId) throws CodeException {
+            Task task = getTaskById(taskId);
+            User user = userService.getUserById(memberId);
+            if (user.getUserId().equals((memberId))) {
+                throw new CodeException("User is not a member of this project");
+            }
+            MemberTask memberTask = memberTaskRepository.findByMemberAndTask(user, task);
+            return task.getDueDate().before(new Date()) && !memberTask.getIs_completed();
         }
-        MemberTask memberTask = memberTaskRepository.findByMemberAndTask(user, task);
-        return task.getDueDate().before(new Date()) && !memberTask.getIs_completed();
-    }
 
     public Task completeTask(Integer taskId, Integer memberId) throws CodeException {
         Task task = getTaskById(taskId);
@@ -156,5 +160,82 @@ public class TaskServiceImplement implements TaskService {
         Task task = getTaskById(taskId);
         task.setDueDate(dueDate);
         return taskRepository.save(task);
+    }
+    @Override
+    public List<RateReport> rateCompleteTaskByProjectOfUser(Integer projectId) throws CodeException {
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        if (tasks.isEmpty()) {
+            throw new CodeException("No tasks found for the given project.");
+        }
+
+        Map<Integer, Integer> totalTasksMap = new HashMap<>();
+        Map<Integer, Integer> completedTasksMap = new HashMap<>();
+        Map<Integer, String> userNamesMap = new HashMap<>();
+
+        for (Task task : tasks) {
+            List<MemberTask> memberTasks = memberTaskRepository.findMemberTaskByTaskId(task.getTaskId());
+            for (MemberTask memberTask : memberTasks) {
+                User user = memberTask.getMember();
+                if (user != null) {
+                    Integer userId = user.getUserId();
+                    String userName = user.getUsername();
+                    userNamesMap.putIfAbsent(userId, userName);
+                    totalTasksMap.put(userId, totalTasksMap.getOrDefault(userId, 0) + 1);
+                    if (Boolean.TRUE.equals(memberTask.getIs_completed())) {
+                        completedTasksMap.put(userId, completedTasksMap.getOrDefault(userId, 0) + 1);
+                    }
+                }
+            }
+        }
+        List<RateReport> reports = new ArrayList<>();
+        for (Integer userId : totalTasksMap.keySet()) {
+            int totalTasks = totalTasksMap.get(userId);
+            int completedTasks = completedTasksMap.getOrDefault(userId, 0);
+            double rate = (totalTasks > 0) ? ((double) completedTasks / totalTasks) * 100 : 0.0;
+
+            reports.add(new RateReport(userId, userNamesMap.get(userId), completedTasks, rate));
+        }
+
+        return reports;
+    }
+
+    @Override
+    public List<RateReport> getRateCompleteOfTask(Integer projectId) throws CodeException {
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        if (tasks.isEmpty()) {
+            throw new CodeException("No tasks found for the given project.");
+        }
+
+        List<RateReport> reports = new ArrayList<>();
+
+        for (Task task : tasks) {
+            List<MemberTask> memberTasks = memberTaskRepository.findMemberTaskByTaskId(task.getTaskId());
+            int totalMembers = memberTasks.size();
+            int completedMembers = 0;
+            for (MemberTask memberTask : memberTasks) {
+                if (Boolean.TRUE.equals(memberTask.getIs_completed())) {
+                    completedMembers++;
+                }
+            }
+            double completionRate = (totalMembers > 0) ? ((double) completedMembers / totalMembers) * 100 : 0.0;
+            reports.add(new RateReport(task.getTaskId(), task.getTitle(), completedMembers, completionRate));
+        }
+        return reports;
+    }
+
+    @Override
+    public List<TaskResponseForGetAll> OverdueTask(Integer projectId) throws CodeException {
+        List<Task> tasks = taskRepository.findAllByProjectId(projectId);
+        if (tasks == null || tasks.isEmpty()) {
+            throw new CodeException("No tasks found for the given project.");
+        }
+        List<TaskResponseForGetAll> taskOverdue = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getIsOverdue() != null && task.getIsOverdue()) {
+                TaskResponseForGetAll taskResponse = TaskResponseForGetAll.fromEntity(task);
+                taskOverdue.add(taskResponse);
+            }
+        }
+        return taskOverdue;
     }
 }
