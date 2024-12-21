@@ -1,5 +1,6 @@
 package com.project.oop.PMS.controller;
 
+import com.project.oop.PMS.dto.CommentResponse;
 import com.project.oop.PMS.entity.Comment;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.service.CommentService;
@@ -22,18 +23,20 @@ public class CommentController {
 
 
     @PostMapping("/create/{userId}")
-    public ResponseEntity<Comment> createComment(@RequestBody Comment comment, @PathVariable Integer projectId, @PathVariable Integer taskId, @PathVariable Integer userId) throws CodeException, CodeException {
-        return ResponseEntity.ok().body(commentService.addComment(taskId, userId, comment.getContent()));
+    public ResponseEntity<CommentResponse> createComment(@RequestBody String comment, @PathVariable Integer projectId, @PathVariable Integer taskId, @PathVariable Integer userId) throws CodeException, CodeException {
+        return ResponseEntity.ok().body(CommentResponse.fromEntity(commentService.addComment(taskId, userId, comment)));
     }
 
     @GetMapping("get-all")
-    public ResponseEntity<List<Comment>> getAllComment(@PathVariable Integer taskId) throws CodeException {
-        return ResponseEntity.ok().body(taskService.getTaskById(taskId).getComments());
+    public ResponseEntity<List<CommentResponse>> getAllComment(@PathVariable Integer taskId) throws CodeException {
+        List <Comment> comments = taskService.getTaskById(taskId).getComments();
+        List<CommentResponse> commentResponses = comments.stream().map(CommentResponse::fromEntity).toList();
+        return ResponseEntity.ok().body(commentResponses);
     }
 
     @PutMapping("{commentId}/edit/{userId}")
-    public ResponseEntity<Comment> editComment(@RequestBody Comment comment, @PathVariable Integer commentId, @PathVariable Integer userId) throws CodeException {
-        return ResponseEntity.ok().body(commentService.editComment(commentId, userId, comment.getContent()));
+    public ResponseEntity<CommentResponse> editComment(@RequestBody String comment, @PathVariable Integer commentId, @PathVariable Integer userId) throws CodeException {
+        return ResponseEntity.ok().body(CommentResponse.fromEntity(commentService.editComment(commentId, userId, comment)));
     }
 
     @DeleteMapping("{commentId}/delete/{userId}")

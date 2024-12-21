@@ -47,7 +47,8 @@ public class CommentServiceImplTA implements CommentService {
     public Comment addComment(Integer taskId, Integer userId, String content) throws CodeException {
         Task task = taskService.getTaskById(taskId);
         User user = userService.getUserById(userId);
-        if (!projectService.getMembers(task.getProject().getProjectId()).contains(user)) {
+        Project project = task.getProject();
+        if (!(projectService.getMembersIdOfProject(project.getProjectId()).contains(userId))) {
             throw new CodeException("User" + user.getUsername() + "is not a member of this project");
         }
         Comment comment = new Comment(task, user, content, new Date());
@@ -71,7 +72,7 @@ public class CommentServiceImplTA implements CommentService {
         User user = userService.getUserById(userId);
         Task task = comment.getTask();
         Project project = task.getProject();
-        if (!comment.getUser().getUserId().equals(user.getUserId()) || !projectService.getManager(project.getProjectId()).getUserId().equals(user.getUserId())) {
+        if ((!comment.getUser().getUserId().equals(user.getUserId())) && (!projectService.getManager(project.getProjectId()).getUserId().equals(userId))) {
             throw new CodeException("You cannot delete this comment");
         }
         commentRepository.delete(comment);

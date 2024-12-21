@@ -34,4 +34,7 @@ public class User {
     @JsonManagedReference("user-memberTask")
     private List<MemberTask> memberTasks = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.PERSIST)
+    private List<Comment> comments = new ArrayList<>();
+
 }
