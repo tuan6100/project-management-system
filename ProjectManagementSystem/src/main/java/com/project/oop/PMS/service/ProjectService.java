@@ -22,6 +22,6 @@ public interface ProjectService {
 	 public void deleteProject(Integer projectId, Integer managerId) throws CodeException;
 	 public List<Task> getTasks(Integer projectId) throws CodeException;
 	 public List<TaskResponse> getTasksInProject(Integer projectId) throws CodeException;
-	public Project addMember(Integer projectId, Integer managerId, List<String> usersName) throws CodeException;
+	public List<GetAllMemberForProjectResponse> addMember(Integer projectId, Integer managerId, List<String> usersName) throws CodeException;
 
 }

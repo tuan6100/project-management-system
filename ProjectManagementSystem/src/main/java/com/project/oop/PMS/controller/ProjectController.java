@@ -59,13 +59,15 @@ public class ProjectController {
     }
 
     @PostMapping("/{projectId}/member/add/{managerId}")
-    public ResponseEntity<ProjectResponse> addMemberToProject(@PathVariable Integer projectId,
-                                                      @PathVariable Integer managerId,
-                                                      @RequestBody List<String> newMembers
-                                                      ) throws CodeException {
-        Project project = projectService.addMember(projectId, managerId, newMembers);
-        return ResponseEntity.ok(projectService.getProjectResponse(project));
+    public ResponseEntity<List<GetAllMemberForProjectResponse>> addMemberToProject(
+            @PathVariable Integer projectId,
+            @PathVariable Integer managerId,
+            @RequestBody List<String> newMembers
+    ) throws CodeException {
+        List<GetAllMemberForProjectResponse> updatedMembers = projectService.addMember(projectId, managerId, newMembers);
+        return ResponseEntity.ok(updatedMembers);
     }
+
 
     @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberId}")
     public ResponseEntity<String> removeMemberFromProject(@PathVariable Integer projectId,

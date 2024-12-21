@@ -4,12 +4,10 @@ import com.project.oop.PMS.dto.*;
 import com.project.oop.PMS.entity.*;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
-import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.ProjectRepository;
 import com.project.oop.PMS.repository.UserRepository;
 import com.project.oop.PMS.service.ProjectService;
 
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -87,7 +85,7 @@ public class ProjectServiceImplementTA implements ProjectService {
     }
 
     @Override
-    public Project addMember(Integer projectId, Integer managerId, List<String> userNames) throws CodeException {
+    public List<GetAllMemberForProjectResponse> addMember(Integer projectId, Integer managerId, List<String> userNames) throws CodeException {
         // Kiểm tra quyền của manager
         if (!getManager(projectId).getUserId().equals(managerId)) {
             throw new CodeException("You do not have permission to perform this action");
@@ -100,6 +98,10 @@ public class ProjectServiceImplementTA implements ProjectService {
         if (currentMembers == null) {
             throw new CodeException("Cannot retrieve members for project ID " + projectId);
         }
+
+        // Log danh sách hiện tại
+        System.out.println("Current members for project " + projectId + ":");
+        currentMembers.forEach(member -> System.out.println("Member ID: " + member.getUserId()));
 
         // Duyệt qua danh sách tên người dùng
         for (String userName : userNames) {
@@ -114,7 +116,7 @@ public class ProjectServiceImplementTA implements ProjectService {
 
                 // Kiểm tra nếu người dùng đã là thành viên
                 boolean isAlreadyMember = currentMembers.stream()
-                        .anyMatch(member -> member.getUserId().equals(user.getUserId()));
+                        .anyMatch(member -> member.getUserId() != null && member.getUserId().equals(user.getUserId()));
 
                 if (isAlreadyMember) {
                     errors.add("User " + userName + " is already a member of the project");
@@ -135,7 +137,8 @@ public class ProjectServiceImplementTA implements ProjectService {
             throw new CodeException(String.join("; ", errors));
         }
 
-        return getProjectById(projectId);
+        // Trả về danh sách tất cả các thành viên sau khi thêm
+        return getMembers(projectId);
     }
 
 
