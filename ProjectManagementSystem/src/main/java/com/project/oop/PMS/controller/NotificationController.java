@@ -48,4 +48,15 @@ public class NotificationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+    @PostMapping("/projects/{projectId}/{managerId}/notify-upcoming-tasks")
+    public ResponseEntity<String> notifyUpcomingTasks(
+            @PathVariable Integer projectId,
+            @PathVariable Integer managerId) {
+        try {
+            notificationService.notifyUpcomingTasks(projectId, managerId);
+            return ResponseEntity.ok("Notifications sent for upcoming tasks");
+        } catch (CodeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

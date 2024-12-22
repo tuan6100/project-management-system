@@ -16,4 +16,6 @@ public interface NotificationService {
 
 	List<Notification> getAllNotificationsForUser(Integer userId);
 	public TaskNotification createTaskAssignmentNotification(Integer userId, Integer taskId, String taskTitle, String message);
+
+	void notifyUpcomingTasks(Integer projectId, Integer managerId) throws CodeException;
 }

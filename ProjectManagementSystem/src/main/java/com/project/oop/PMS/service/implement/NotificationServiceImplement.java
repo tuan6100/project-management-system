@@ -1,7 +1,10 @@
 package com.project.oop.PMS.service.implement;
 
+import com.project.oop.PMS.entity.MemberTask;
 import com.project.oop.PMS.entity.Notification;
+import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.ProjectNotification;
+import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.TaskNotification;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.exception.CodeException;
@@ -10,8 +13,10 @@ import com.project.oop.PMS.service.NotificationService;
 import com.project.oop.PMS.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import com.project.oop.PMS.repository.ProjectRepository;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,7 +27,8 @@ public class NotificationServiceImplement implements NotificationService {
 
     @Autowired
     private UserService userService;
-
+ @Autowired
+ private ProjectRepository projectRepository;
     @Override
     public Notification createProjectInvitation(Integer userId, Integer projectId, String message) {
         Notification notification = new Notification();
@@ -103,5 +109,47 @@ public class NotificationServiceImplement implements NotificationService {
         notification.setIsRead(true);
         notificationRepository.save(notification);
     }
-    
+    @Override
+    public void notifyUpcomingTasks(Integer projectId, Integer managerId) throws CodeException {
+        // Lấy thông tin dự án
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new CodeException("Project not found"));
+
+        // Kiểm tra quyền của manager
+  //      if (!project.getManager().getUserId().equals(managerId)) {
+    //        throw new CodeException("You are not authorized to notify users for this project");
+    //    }
+
+        // Lấy danh sách task sắp đến hạn (còn 1 ngày hoặc ít hơn)
+        Date now = new Date();
+        Date upcomingDate = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // Thêm 1 ngày
+
+        List<Task> upcomingTasks = project.getTasks().stream()
+                .filter(task -> task.getDueDate() != null &&
+                        !task.getDueDate().before(now) &&
+                        task.getDueDate().before(upcomingDate))
+                .toList();
+
+        if (upcomingTasks.isEmpty()) {
+            throw new CodeException("No upcoming tasks found within 1 day for this project");
+        }
+
+        // Gửi thông báo cho từng thành viên liên quan
+        for (Task task : upcomingTasks) {
+            for (MemberTask memberTask : task.getMemberTasks()) {
+                Integer userId = memberTask.getMember().getUserId();
+                String message = "Reminder: Task \"" + task.getTitle() + "\" is due on " + task.getDueDate();
+
+                ProjectNotification notification = new ProjectNotification(
+                        userId,
+                        projectId,
+                        message
+                );
+
+                notification.setActionType("UPCOMING_TASK");
+                notification.setReferenceId(task.getTaskId());
+                notificationRepository.save(notification);
+            }
+        }
+    }
 }
