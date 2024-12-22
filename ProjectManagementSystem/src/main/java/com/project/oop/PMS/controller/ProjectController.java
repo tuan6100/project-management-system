@@ -15,6 +15,7 @@ import com.project.oop.PMS.service.implement.UserServiceImplement;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -103,6 +104,32 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable Integer projectId, @PathVariable Integer managerId) throws CodeException {
         projectService.deleteProject(projectId, managerId);
         return ResponseEntity.ok(Map.of("message", "Project deleted successfully"));
+    }
+    @GetMapping("/{projectId}/report/{reportType}")
+    public ResponseEntity<?> generateReport(
+            @PathVariable Integer projectId,
+            @PathVariable String reportType) {
+        try {
+            Object reportResult;
+            switch (reportType.toLowerCase()) {
+                case "rate-complete-user":
+                    reportResult = projectService.rateCompleteTaskByProjectOfUser(projectId);
+                    break;
+                case "rate-complete-task":
+                    reportResult = projectService.getRateCompleteOfTask(projectId);
+                    break;
+                case "overdue-tasks":
+                    reportResult = projectService.OverdueTask(projectId);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid report type: " + reportType);
+            }
+            return ResponseEntity.ok(reportResult);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
+        }
     }
 
 }

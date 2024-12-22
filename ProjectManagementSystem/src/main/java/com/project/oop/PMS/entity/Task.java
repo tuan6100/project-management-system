@@ -51,7 +51,7 @@ public class Task {
         overdue
     }
 
-    @Column(name = "is_overdue")
+    @Column(name = "is_overdue", insertable = false)
     private Boolean isOverdue = false;
 
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

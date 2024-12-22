@@ -11,6 +11,7 @@ import com.project.oop.PMS.service.TaskService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -167,5 +168,11 @@ public class TaskServiceImplement implements TaskService {
         Task task = getTaskById(taskId);
         task.setDueDate(dueDate);
         return taskRepository.save(task);
+    }
+    @Scheduled(cron = "0 0 0 * * ?") // Chạy mỗi giờ
+    public void updateOverdueTasks() {
+        List<Task> overdueTasks = taskRepository.findAllByDueDateBeforeAndIsOverdueNull(new Date());
+        overdueTasks.forEach(task -> task.setIsOverdue(true));
+        taskRepository.saveAll(overdueTasks);
     }
 }

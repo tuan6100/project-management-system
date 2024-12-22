@@ -5,7 +5,9 @@ import java.util.List;
 import com.project.oop.PMS.dto.GetAllMemberForProjectResponse;
 import com.project.oop.PMS.dto.ProjectRequest;
 import com.project.oop.PMS.dto.ProjectResponse;
+import com.project.oop.PMS.dto.RateReport;
 import com.project.oop.PMS.dto.TaskResponse;
+import com.project.oop.PMS.dto.TaskResponseForGetAll;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.User;
@@ -29,5 +31,7 @@ public interface ProjectService {
 
 
 	 public ProjectResponse getProjectResponse(Project project);
-
+	 public List<RateReport> rateCompleteTaskByProjectOfUser(Integer projectId) throws CodeException;
+	 public List<TaskResponseForGetAll> OverdueTask(Integer projectId) throws CodeException;
+	 public List<RateReport> getRateCompleteOfTask(Integer projectId) throws CodeException;
 }
