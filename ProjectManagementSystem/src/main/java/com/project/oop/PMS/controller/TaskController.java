@@ -87,31 +87,4 @@ public class TaskController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update task completion: " + e.getMessage());
         }
     }
-
-    @GetMapping("/report/{reportType}")
-    public ResponseEntity<?> generateReport(
-            @PathVariable Integer projectId,
-            @PathVariable String reportType) {
-        try {
-            Object reportResult;
-            switch (reportType.toLowerCase()) {
-                case "rate-complete-user":
-                    reportResult = taskService.rateCompleteTaskByProjectOfUser(projectId);
-                    break;
-                case "rate-complete-task":
-                    reportResult = taskService.getRateCompleteOfTask(projectId);
-                    break;
-                case "overdue-tasks":
-                    reportResult = taskService.OverdueTask(projectId);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid report type: " + reportType);
-            }
-            return ResponseEntity.ok(reportResult);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred: " + e.getMessage());
-        }
-    }
 }

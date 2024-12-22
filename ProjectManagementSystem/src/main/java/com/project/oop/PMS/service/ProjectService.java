@@ -2,9 +2,7 @@ package com.project.oop.PMS.service;
 
 import java.util.List;
 
-import com.project.oop.PMS.dto.GetAllMemberForProjectResponse;
-import com.project.oop.PMS.dto.ProjectRequest;
-import com.project.oop.PMS.dto.TaskResponse;
+import com.project.oop.PMS.dto.*;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.User;
@@ -23,5 +21,8 @@ public interface ProjectService {
 	 public List<Task> getTasks(Integer projectId) throws CodeException;
 	 public List<TaskResponse> getTasksInProject(Integer projectId) throws CodeException;
 	public List<GetAllMemberForProjectResponse> addMember(Integer projectId, Integer managerId, List<String> usersName) throws CodeException;
+	public List<RateReport> rateCompleteTaskByProjectOfUser(Integer projectId) throws CodeException;
+	public List<TaskResponseForGetAll> OverdueTask(Integer projectId) throws CodeException;
+	public List<RateReport> getRateCompleteOfTask(Integer projectId) throws CodeException;
 
 }
