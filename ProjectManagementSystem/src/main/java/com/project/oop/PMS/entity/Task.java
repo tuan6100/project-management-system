@@ -31,6 +31,7 @@ public class Task {
     private String description;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "create_date", insertable = false, updatable = false)
     private Date createDate;
 
     @Temporal(TemporalType.TIMESTAMP)

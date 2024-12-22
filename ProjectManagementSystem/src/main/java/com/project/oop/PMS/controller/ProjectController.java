@@ -38,10 +38,11 @@ public class ProjectController {
     private ProjectServiceImplementTrung projectServiceTrung;
 
     @PostMapping("/add/{managerId}")
-    public ResponseEntity<ProjectResponse> addProject(@RequestBody ProjectRequest request, @PathVariable Integer managerId) throws CodeException {
-        Project project = projectService.createProject(request, managerId);
-        return ResponseEntity.ok(projectService.getProjectResponse(project));
+    public ResponseEntity<String> addProject(@RequestBody ProjectRequest request, @PathVariable Integer managerId) throws CodeException {
+        projectService.createProject(request, managerId);
+        return ResponseEntity.ok("Project created successfully!");
     }
+
 
     @GetMapping("/{projectId}/details")
     public ResponseEntity<ProjectResponseForProjectDetails> getProjectInfo(@PathVariable Integer projectId) throws CodeException {

@@ -32,10 +32,10 @@ public class MemberProject {
     @JsonBackReference("project-memberProject")
     private Project project;
 
-    @Column(name = "role")
+    @Column(name = "role", insertable = false, updatable = false)
     private String role;
 
-    @Column(name = "join_date")
+    @Column(name = "join_date", insertable = false, updatable = false)
     private Date joinDate;
 
     @OneToMany(mappedBy = "memberProject", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
