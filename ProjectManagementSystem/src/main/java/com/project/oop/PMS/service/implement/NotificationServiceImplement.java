@@ -16,6 +16,8 @@ import org.springframework.stereotype.Service;
 import com.project.oop.PMS.repository.ProjectRepository;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -30,13 +32,14 @@ public class NotificationServiceImplement implements NotificationService {
  @Autowired
  private ProjectRepository projectRepository;
     @Override
-    public Notification createProjectInvitation(Integer userId, Integer projectId, String message) {
+    public Notification createProjectInvitation(Integer userId, Integer projectId, String message, Integer mangerId) {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setReferenceId(projectId);
         notification.setMessage(message);
         notification.setActionType("PROJECT_INVITATION");
         notification.setActionStatus("PENDING");
+        notification.setManagerId(mangerId);
         return notificationRepository.save(notification);
     }
 
@@ -81,6 +84,13 @@ public class NotificationServiceImplement implements NotificationService {
                 result.add(notification);
             }
         }
+        // Sắp xếp theo createDate giảm dần
+        Collections.sort(result, new Comparator<Notification>() {
+            @Override
+            public int compare(Notification n1, Notification n2) {
+                return n2.getCreatedAt().compareTo(n1.getCreatedAt()); // Giảm dần
+            }
+        });
 
         return result;
     }
@@ -122,7 +132,7 @@ public class NotificationServiceImplement implements NotificationService {
 
         // Lấy danh sách task sắp đến hạn (còn 1 ngày hoặc ít hơn)
         Date now = new Date();
-        Date upcomingDate = new Date(now.getTime() + (24 * 60 * 60 * 1000)); // Thêm 1 ngày
+        Date upcomingDate = new Date(now.getTime() + (24 * 60 * 60 * 1000 * 2)); // Thêm 1 ngày
 
         List<Task> upcomingTasks = project.getTasks().stream()
                 .filter(task -> task.getDueDate() != null &&

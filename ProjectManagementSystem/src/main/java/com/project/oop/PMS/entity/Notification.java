@@ -39,9 +39,12 @@ public  class Notification {
 
     @Column(name = "action_type")
     private String actionType;
+    @Column(name = "manager_id")
+    private Integer managerId;
 
     @Column(name = "reference_id")
     private Integer referenceId;
+    
 
     // Getters and Setters
     public String getActionStatus() {

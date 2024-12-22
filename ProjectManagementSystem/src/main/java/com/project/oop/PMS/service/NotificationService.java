@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface NotificationService {
 
-    Notification createProjectInvitation(Integer userId, Integer projectId, String message);
+    
 
     String handleNotificationAction(Integer notificationId, String action) throws CodeException;
     void markAsRead(Integer notificationId) throws CodeException;
@@ -18,4 +18,6 @@ public interface NotificationService {
 	public TaskNotification createTaskAssignmentNotification(Integer userId, Integer taskId, String taskTitle, String message);
 
 	void notifyUpcomingTasks(Integer projectId, Integer managerId) throws CodeException;
+
+	Notification createProjectInvitation(Integer userId, Integer projectId, String message, Integer mangerId);
 }

@@ -2,6 +2,7 @@ package com.project.oop.PMS.service.implement;
 
 import com.project.oop.PMS.dto.TaskRequest;
 import com.project.oop.PMS.entity.*;
+import com.project.oop.PMS.entity.Task.TaskStatus;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.MemberTaskRepository;
@@ -74,9 +75,14 @@ public class TaskServiceImplement implements TaskService {
         memberTask.setTask(task);
         memberTask.setMember(userService.getUserById(memberId));
         memberTask.setIs_completed(false);
+       
         memberTask.setMemberProject(memberProject);
         memberTaskRepository.save(memberTask);
         task.getMemberTasks().add(memberTask);
+        if(task.getStatus().equals(Task.TaskStatus.pending))
+        {
+        	task.setStatus(Task.TaskStatus.in_progress);
+        }
         taskRepository.save(task);
      // Tạo thông báo
         String message = "You have been assigned to the task: " + task.getTitle();

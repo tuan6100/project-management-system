@@ -27,11 +27,13 @@ public interface ProjectService {
 	 public List<Task> getTasks(Integer projectId) throws CodeException;
 	 public List<TaskResponse> getTasksInProject(Integer projectId) throws CodeException;
 	 public List<GetAllMemberForProjectResponse> getMembers(Integer projectId);
-	public Project addMember(Integer projectId, Integer managerId, List<String> usersName) throws CodeException;
+
 
 
 	 public ProjectResponse getProjectResponse(Project project);
 	 public List<RateReport> rateCompleteTaskByProjectOfUser(Integer projectId) throws CodeException;
 	 public List<TaskResponseForGetAll> OverdueTask(Integer projectId) throws CodeException;
 	 public List<RateReport> getRateCompleteOfTask(Integer projectId) throws CodeException;
+	List<GetAllMemberForProjectResponse> addMember(Integer projectId, Integer managerId, List<String> userNames)
+			throws CodeException;
 }

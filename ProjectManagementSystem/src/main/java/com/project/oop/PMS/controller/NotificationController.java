@@ -1,5 +1,6 @@
 package com.project.oop.PMS.controller;
 
+import com.project.oop.PMS.dto.ErrorResponse;
 import com.project.oop.PMS.entity.Notification;
 import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.service.NotificationService;
@@ -18,12 +19,14 @@ public class NotificationController {
     private NotificationService notificationService;
 
     // Tạo thông báo mời tham gia dự án
-    @PostMapping("/invite/{userId}/{projectId}/{message}")
+    @PostMapping("/invite/{userId}/{managerId}/{projectId}/{message}")
     public Notification createProjectInvitation(
+    		
             @PathVariable Integer userId,
+            @PathVariable Integer managerId,
             @PathVariable Integer projectId,
             @PathVariable String message) {
-        return notificationService.createProjectInvitation(userId, projectId, message);
+        return notificationService.createProjectInvitation(userId, projectId, message,managerId);
     }
 
     // Xử lý hành động với thông báo (Accept/Deny)
@@ -49,14 +52,18 @@ public class NotificationController {
         }
     }
     @PostMapping("/projects/{projectId}/{managerId}/notify-upcoming-tasks")
-    public ResponseEntity<String> notifyUpcomingTasks(
+    public ResponseEntity<?> notifyUpcomingTasks(
             @PathVariable Integer projectId,
             @PathVariable Integer managerId) {
         try {
             notificationService.notifyUpcomingTasks(projectId, managerId);
             return ResponseEntity.ok("Notifications sent for upcoming tasks");
         } catch (CodeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            // Trả về JSON thông báo lỗi khi không có task gần đến hạn
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                new ErrorResponse("No upcoming tasks found within 1 day for this project")
+            );
         }
     }
 }
+

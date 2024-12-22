@@ -149,13 +149,25 @@ public class ProjectServiceImplementTrung implements ProjectService {
         return memberProjectRepository.findMemberNotManagerByProjectId(projectId);
     }
 
+
     @Override
-    public Project addMember(Integer projectId, Integer managerId, List<String> userNames) throws CodeException {
+    public List<GetAllMemberForProjectResponse> addMember(Integer projectId, Integer managerId, List<String> userNames) throws CodeException {
+        // Kiểm tra quyền của manager
         if (!getManager(projectId).getUserId().equals(managerId)) {
-            throw new CodeException("You do not have permission to do");
+            throw new CodeException("You do not have permission to perform this action");
         }
 
         List<String> errors = new ArrayList<>();
+
+        // Lấy danh sách thành viên hiện tại của project
+        List<GetAllMemberForProjectResponse> currentMembers = getMembers(projectId);
+        if (currentMembers == null) {
+            throw new CodeException("Cannot retrieve members for project ID " + projectId);
+        }
+
+        // Log danh sách hiện tại
+        System.out.println("Current members for project " + projectId + ":");
+        currentMembers.forEach(member -> System.out.println("Member ID: " + member.getUserId()));
 
         // Duyệt qua danh sách tên người dùng
         for (String userName : userNames) {
@@ -163,14 +175,25 @@ public class ProjectServiceImplementTrung implements ProjectService {
                 // Lấy đối tượng User từ tên người dùng
                 User user = userRepository.findByUserName(userName);
 
-                // Kiểm tra nếu người dùng chưa là thành viên
-                if (!getMembers(projectId).contains(user)) {
-                    MemberProject memberProject = new MemberProject(user, getProjectById(projectId));
-                    memberProjectRepository.save(memberProject);
-                } else {
-                    errors.add("User " + userName + " is already a member of the project");
+                if (user == null) {
+                    errors.add("User " + userName + " does not exist");
+                    continue;
                 }
-            } catch (CodeException e) {
+
+                // Kiểm tra nếu người dùng đã là thành viên
+                boolean isAlreadyMember = currentMembers.stream()
+                        .anyMatch(member -> member.getUserId() != null && member.getUserId().equals(user.getUserId()));
+
+                if (isAlreadyMember) {
+                    errors.add("User " + userName + " is already a member of the project");
+                    continue;
+                }
+
+                // Thêm thành viên mới với role là "member"
+                MemberProject memberProject = new MemberProject(user, getProjectById(projectId), "member");
+                memberProjectRepository.save(memberProject);
+
+            } catch (Exception e) {
                 errors.add("Error with user " + userName + ": " + e.getMessage());
             }
         }
@@ -180,8 +203,8 @@ public class ProjectServiceImplementTrung implements ProjectService {
             throw new CodeException(String.join("; ", errors));
         }
 
-        return getProjectById(projectId);
-
+        // Trả về danh sách tất cả các thành viên sau khi thêm
+        return getMembers(projectId);
     }
 
 
