@@ -3,6 +3,7 @@ package com.project.oop.PMS.controller;
 import com.project.oop.PMS.dto.ErrorResponse;
 import com.project.oop.PMS.entity.Notification;
 import com.project.oop.PMS.exception.CodeException;
+import com.project.oop.PMS.repository.UserRepository;
 import com.project.oop.PMS.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,16 +18,19 @@ public class NotificationController {
 
     @Autowired
     private NotificationService notificationService;
-
+    @Autowired
+    private UserRepository userRepository;
+    
+    
     // Tạo thông báo mời tham gia dự án
-    @PostMapping("/invite/{userId}/{managerId}/{projectId}/{message}")
+    @PostMapping("/invite/{userName}/{managerId}/{projectId}/{message}")
     public Notification createProjectInvitation(
     		
-            @PathVariable Integer userId,
+            @PathVariable String userName,
             @PathVariable Integer managerId,
             @PathVariable Integer projectId,
             @PathVariable String message) {
-        return notificationService.createProjectInvitation(userId, projectId, message,managerId);
+        return notificationService.createProjectInvitation(userRepository.findByUserName(userName).getUserId(), projectId, message,managerId);
     }
 
     // Xử lý hành động với thông báo (Accept/Deny)
