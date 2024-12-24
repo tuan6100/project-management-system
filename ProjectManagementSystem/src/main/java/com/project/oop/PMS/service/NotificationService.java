@@ -8,11 +8,9 @@ import java.util.List;
 
 public interface NotificationService {
 
-    
 
     String handleNotificationAction(Integer notificationId, String action) throws CodeException;
     void markAsRead(Integer notificationId) throws CodeException;
-   
 
 	List<Notification> getAllNotificationsForUser(Integer userId);
 	public TaskNotification createTaskAssignmentNotification(Integer userId, Integer taskId, String taskTitle, String message);

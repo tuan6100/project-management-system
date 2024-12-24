@@ -24,8 +24,10 @@ public class TaskController {
 
     @Autowired
     private TaskServiceImplement taskService;
+
     @Autowired
     private ProjectServiceImplement projectService;
+
     @Autowired
     private ProjectServiceImplementTrung projectServiceTrung;
 

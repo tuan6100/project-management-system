@@ -19,8 +19,10 @@ public class UserController {
 
     @Autowired
     private UserServiceImplement userService;
+
     @Autowired
     private ProjectServiceImplementTrung projectService;
+
 
     @GetMapping("/{id}/get-all-project")
     public ResponseEntity<List<ProjectResponseForGetAll>> getAllProjectsByUserId(@PathVariable int id) throws CodeException {

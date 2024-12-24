@@ -40,11 +40,14 @@ public class ProjectServiceImplementTA implements ProjectService {
     @Autowired
     @Lazy
     private TaskServiceImplement taskService;
+
     @Autowired
     private TaskRepository taskRepository;
+
     @Autowired
     private MemberTaskRepository memberTaskRepository;
-    
+
+
     @Override
     public Project createProject(ProjectRequest projectRequest, Integer userId) throws CodeException {
         Project project = new Project(projectRequest.getName(), projectRequest.getDescription());
