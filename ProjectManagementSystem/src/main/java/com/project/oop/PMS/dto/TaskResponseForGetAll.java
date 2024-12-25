@@ -19,6 +19,7 @@ public class TaskResponseForGetAll {
     private String title;
     private String dueDate;
     private String status;
+   private Boolean isOverdue; 
 
     public  static TaskResponseForGetAll fromEntity(Task task) {
         TaskResponseForGetAll taskResponse = new TaskResponseForGetAll();
@@ -27,6 +28,7 @@ public class TaskResponseForGetAll {
         taskResponse.setTitle(task.getTitle());
         taskResponse.setDueDate(task.getDueDate().toString());
         taskResponse.setStatus(task.getStatus().toString());
+        taskResponse.setIsOverdue(task.getIsOverdue());
         return taskResponse;
     }
 }
