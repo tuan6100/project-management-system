@@ -18,4 +18,6 @@ public interface UserService {
 	public List<ProjectResponseForGetAll> getAllProjects(Integer userId);
 
 	public List<TaskResponse> getAllTasksByUser(Integer userId);
+
+	Integer getUserIdByUsername(String username);
 }

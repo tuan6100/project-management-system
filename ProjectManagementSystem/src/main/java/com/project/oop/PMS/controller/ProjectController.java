@@ -72,14 +72,23 @@ public class ProjectController {
         return ResponseEntity.ok(updatedMembers);
     }
 
-    @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberId}")
+    @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberName}")
     public ResponseEntity<String> removeMemberFromProject(@PathVariable Integer projectId,
-                                                           @PathVariable Integer managerId,
-                                                           @PathVariable Integer memberId
-                                                           ) throws CodeException {
+                                                          @PathVariable Integer managerId,
+                                                          @PathVariable String memberName) throws CodeException {
+        // Tìm memberId dựa trên memberName
+        Integer memberId = userService.getUserIdByUsername(memberName);
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Member with name " + memberName + " not found");
+        }
+
+        // Gọi hàm removeMember với memberId
         projectService.removeMember(projectId, managerId, memberId);
-        return ResponseEntity.ok("Member " +  userService.getUserById(memberId).getUsername() + " removed successfully");
+
+        // Trả về phản hồi thành công
+        return ResponseEntity.ok("Member " + memberName + " removed successfully");
     }
+
 
     @PutMapping("/{projectId}")
     public ResponseEntity<?> updateProject(@PathVariable Integer projectId, @RequestParam Integer userId, @RequestBody ProjectRequest projectRequest) throws CodeException {
