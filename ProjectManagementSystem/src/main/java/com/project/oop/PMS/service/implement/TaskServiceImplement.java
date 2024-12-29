@@ -15,8 +15,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TaskServiceImplement implements TaskService {
@@ -181,5 +185,23 @@ public class TaskServiceImplement implements TaskService {
         List<Task> overdueTasks = taskRepository.findAllByDueDateBeforeAndIsOverdueNull(new Date());
         overdueTasks.forEach(task -> task.setIsOverdue(true));
         taskRepository.saveAll(overdueTasks);
+    }
+    public Map<String, Long> getCompletedTasksInLast7Days(Integer userId) {
+        Map<String, Long> result = new LinkedHashMap<>();
+
+        // Ngày hiện tại
+        LocalDate today = LocalDate.now();
+
+        // Duyệt từng ngày trong 7 ngày gần nhất
+        for (int i = 6; i >= 0; i--) {
+            LocalDate day = today.minusDays(i);
+            Date startDate = Date.from(day.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endDate = Date.from(day.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            Long count = taskRepository.countCompletedTasksByUserAndDateRange(userId, startDate, endDate);
+            result.put(day.toString(), count);
+        }
+
+        return result;
     }
 }

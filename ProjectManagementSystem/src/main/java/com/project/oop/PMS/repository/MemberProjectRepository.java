@@ -19,7 +19,7 @@ public interface MemberProjectRepository extends JpaRepository<MemberProject, In
     @Query(" SELECT m.user FROM MemberProject m WHERE m.project.projectId = ?1 ")
     List<User> findUserBytProjectId(Integer projectId);
 
-    @Query(" SELECT m.user FROM MemberProject m WHERE m.project.projectId = ?1 AND m.role = 'Manager' ")
+    @Query(" SELECT m.user FROM MemberProject m WHERE m.project.projectId = :projectId AND m.role = 'Manager' ")
     User findManagerIdByProjectId(Integer projectId);
 
     @Query(" SELECT m.user FROM MemberProject m WHERE m.project.projectId = ?1 AND m.role != 'Manager' ")
