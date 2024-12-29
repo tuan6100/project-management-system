@@ -36,7 +36,7 @@ public class NotificationServiceImplement implements NotificationService {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setReferenceId(projectId);
-        notification.setMessage(message);
+        notification.setMessage("You are invited to Project " + projectRepository.findByProjectId(projectId).getName());
         notification.setActionType("PROJECT_INVITATION");
         notification.setActionStatus("PENDING");
         notification.setManagerId(mangerId);
