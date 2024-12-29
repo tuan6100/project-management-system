@@ -53,18 +53,20 @@ public class NotificationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
-    @PostMapping("/projects/{projectId}/{managerId}/notify-upcoming-tasks")
+    @PostMapping("/projects/{projectId}/{managerId}/notify-upcoming-tasks/{days}")
     public ResponseEntity<?> notifyUpcomingTasks(
             @PathVariable Integer projectId,
-            @PathVariable Integer managerId) {
+            @PathVariable Integer managerId,
+            @PathVariable int days) {
         try {
-            notificationService.notifyUpcomingTasks(projectId, managerId);
+            notificationService.notifyUpcomingTasks(projectId, managerId, days);
             return ResponseEntity.ok("Notifications sent for upcoming tasks");
         } catch (CodeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                new ErrorResponse("No upcoming tasks found within 1 day for this project")
+                    new ErrorResponse(e.getMessage())
             );
         }
     }
+
 }
 
