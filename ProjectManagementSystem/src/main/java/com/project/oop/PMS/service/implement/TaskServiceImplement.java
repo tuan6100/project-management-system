@@ -183,7 +183,8 @@ public class TaskServiceImplement implements TaskService {
         task.setDueDate(dueDate);
         return taskRepository.save(task);
     }
-    @Scheduled(cron = "0 0 0 * * ?") // Chạy mỗi giờ
+    @Scheduled(cron = "0 * * * * ?") // Chạy mỗi phút
+
     public void updateOverdueTasks() {
         List<Task> overdueTasks = taskRepository.findAllByDueDateBeforeAndIsOverdueNull(new Date());
         overdueTasks.forEach(task -> task.setIsOverdue(true));
