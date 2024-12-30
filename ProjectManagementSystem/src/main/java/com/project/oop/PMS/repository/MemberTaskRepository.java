@@ -38,4 +38,6 @@ public interface MemberTaskRepository extends JpaRepository<MemberTask, Integer>
     );
     @Query("SELECT COUNT(m) > 0 FROM MemberTask m WHERE m.task = :task AND m.is_completed = :isCompleted")
     boolean existsByTaskAndIsCompleted(@Param("task") Task task, @Param("isCompleted") boolean isCompleted);
+    @Query("SELECT mt FROM MemberTask mt WHERE mt.member.userId = :userId")
+    List<MemberTask> findByMemberUserId(@Param("userId") Integer userId);
     }

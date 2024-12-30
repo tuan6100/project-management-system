@@ -3,6 +3,8 @@ package com.project.oop.PMS.service.implement;
 import com.project.oop.PMS.dto.ProjectResponse;
 import com.project.oop.PMS.dto.ProjectResponseForGetAll;
 import com.project.oop.PMS.dto.TaskResponse;
+import com.project.oop.PMS.dto.UserTaskResponse;
+import com.project.oop.PMS.entity.MemberTask;
 import com.project.oop.PMS.entity.Project;
 import com.project.oop.PMS.entity.Task;
 import com.project.oop.PMS.entity.User;
@@ -100,6 +102,29 @@ public class UserServiceImplement implements UserService {
     public Integer getUserIdByUsername(String username) {
         User user = userRepository.findByUserName(username);
         return user != null ? user.getUserId() : null;
+    }
+    @Override
+    public List<UserTaskResponse> getTasksForUser(Integer userId) {
+        // Lấy tất cả MemberTask liên quan đến user
+        List<MemberTask> memberTasks = memberTaskRepository.findByMemberUserId(userId);
+
+        // Chuyển đổi dữ liệu thành danh sách UserTaskResponse
+        List<UserTaskResponse> taskResponses = new ArrayList<>();
+        for (MemberTask memberTask : memberTasks) {
+            Task task = memberTask.getTask();
+            UserTaskResponse response = new UserTaskResponse(
+                    task.getProject().getProjectId(),
+                    task.getTaskId(),
+                    task.getTitle(),
+                  projectService.getManager(task.getProject().getProjectId()).getUserId() ,
+                    task.getProject().getName(),
+                    task.getDueDate().toString(),
+                    memberTask.getIs_completed() // Lấy trạng thái hoàn thành của user cụ thể
+            );
+            taskResponses.add(response);
+        }
+
+        return taskResponses;
     }
 
 }

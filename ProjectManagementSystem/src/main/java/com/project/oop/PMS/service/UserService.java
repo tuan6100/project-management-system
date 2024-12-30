@@ -2,6 +2,7 @@ package com.project.oop.PMS.service;
 
 import com.project.oop.PMS.dto.ProjectResponseForGetAll;
 import com.project.oop.PMS.dto.TaskResponse;
+import com.project.oop.PMS.dto.UserTaskResponse;
 import com.project.oop.PMS.entity.User;
 import com.project.oop.PMS.exception.CodeException;
 
@@ -20,4 +21,6 @@ public interface UserService {
 	public List<TaskResponse> getAllTasksByUser(Integer userId);
 
 	Integer getUserIdByUsername(String username);
+
+	List<UserTaskResponse> getTasksForUser(Integer userId);
 }
