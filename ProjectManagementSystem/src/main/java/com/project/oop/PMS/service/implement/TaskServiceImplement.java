@@ -87,10 +87,9 @@ public class TaskServiceImplement implements TaskService {
         memberTask.setMemberProject(memberProject);
         memberTaskRepository.save(memberTask);
         task.getMemberTasks().add(memberTask);
-        if(task.getStatus().equals(Task.TaskStatus.pending))
-        {
+        
         	task.setStatus(Task.TaskStatus.in_progress);
-        }
+        
         taskRepository.save(task);
      // Tạo thông báo
         String message = "You have been assigned to the task: " + task.getTitle();
