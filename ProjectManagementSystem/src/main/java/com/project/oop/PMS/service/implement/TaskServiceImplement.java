@@ -201,12 +201,16 @@ public class TaskServiceImplement implements TaskService {
             Date startDate = Date.from(day.atStartOfDay(ZoneId.systemDefault()).toInstant());
             Date endDate = Date.from(day.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
 
-            Long count = taskRepository.countCompletedTasksByUserAndDateRange(userId, startDate, endDate);
+            // Gọi phương thức từ MemberTaskRepository để đếm số lượng task hoàn thành của user trong ngày
+            Long count = memberTaskRepository.countCompletedTasksByUserAndDateRange(userId, startDate, endDate);
+
+            // Thêm kết quả vào Map
             result.put(day.toString(), count);
         }
 
         return result;
     }
+
     public void updateCompleteTask(Integer taskId, Integer memberId) throws CodeException {
         // Lấy thông tin thành viên và task từ database
         User member = userRepository.findByUserId(memberId);
