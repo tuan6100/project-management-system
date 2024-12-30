@@ -2,6 +2,7 @@ package com.project.oop.PMS.config;
 
 import org.apache.hc.client5.http.classic.HttpClient;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,12 +34,13 @@ public class RestTemplateConfig {
         SSLContext sslContext = SSLContextBuilder.create()
                 .loadTrustMaterial(trustStore, null)
                 .build();
-        HttpClient httpClient = (HttpClient) HttpClients.custom()
+        CloseableHttpClient httpClient = HttpClients.custom()
                 .setSSLSocketFactory(new SSLConnectionSocketFactory(sslContext))
                 .build();
         HttpComponentsClientHttpRequestFactory factory =
-                new HttpComponentsClientHttpRequestFactory(httpClient);
+                new HttpComponentsClientHttpRequestFactory((HttpClient) httpClient);
         return new RestTemplate(factory);
+
     }
 
 }
