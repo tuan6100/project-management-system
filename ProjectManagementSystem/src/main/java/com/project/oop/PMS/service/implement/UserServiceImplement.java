@@ -44,12 +44,9 @@ public class UserServiceImplement implements UserService {
     }
 
     @Override
-    public User getUserByAuth(String username, String password) throws CodeException {
-        User user =  userRepository.findByUsernameAndPassword(username, password);
-        if (user == null) {
-            throw new CodeException("Username or password is incorrect!");
-        }
-        return user;
+    public User getUserByAuth(String username, String password) {
+        return userRepository.findByUsernameAndPassword(username, password);
+
     }
 
     @Override
@@ -65,7 +62,11 @@ public class UserServiceImplement implements UserService {
 
     @Override
     public User login(String username, String password) throws CodeException {
-        return getUserByAuth(username, password);
+        User user =  getUserByAuth(username, password);
+        if (user == null) {
+            throw new CodeException("Invalid username or password");
+        }
+        return user;
     }
 
     @Override
