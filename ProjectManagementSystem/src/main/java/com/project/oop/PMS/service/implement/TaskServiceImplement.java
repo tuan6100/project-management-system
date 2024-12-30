@@ -124,7 +124,7 @@ public class TaskServiceImplement implements TaskService {
 
     public Task updateTask(Integer taskId, TaskRequest taskRequest, Integer managerId) throws CodeException {
         Task task = getTaskById(taskId);
-        if (projectService.getManager(task.getProject().getProjectId()).getUserId().equals(managerId)) {
+        if (!projectService.getManager(task.getProject().getProjectId()).getUserId().equals(managerId)) {
             throw new CodeException("You are not the manager of this project");
         }
         if (taskRequest.getTitle() != null) {
