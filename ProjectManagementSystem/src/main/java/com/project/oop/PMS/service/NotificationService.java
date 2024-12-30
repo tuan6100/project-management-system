@@ -19,4 +19,6 @@ public interface NotificationService {
 
 	Notification createProjectInvitation(Integer userId, Integer projectId, String message, Integer mangerId);
 	void notifyUpcomingTasks(Integer projectId, Integer managerId, int days) throws CodeException;
+	void notifyManagerMemberAdded(Integer managerId, Integer projectId, String projectName, String userName);
+	void notifyManagerTaskCompleted(Integer managerId, Integer taskId, String taskTitle, String memberName);
 }

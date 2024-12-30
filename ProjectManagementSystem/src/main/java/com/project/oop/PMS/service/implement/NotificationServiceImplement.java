@@ -158,5 +158,34 @@ public class NotificationServiceImplement implements NotificationService {
             }
         }
     }
+    @Override
+    public void notifyManagerMemberAdded(Integer managerId, Integer projectId, String projectName, String userName) {
+        // Tạo thông báo
+        String message = "User \"" + userName + "\" accepted to the join the project \"" + projectName + "\".";
 
+        ProjectNotification notification = new ProjectNotification(
+                managerId,
+                projectId,
+                message
+        );
+
+        notification.setActionType("MEMBER_ADDED");
+        notification.setReferenceId(null); // Không cần tham chiếu cụ thể đến thành viên
+        notificationRepository.save(notification);
+    }
+    @Override
+    public void notifyManagerTaskCompleted(Integer managerId, Integer taskId, String taskTitle, String memberName) {
+        // Tạo thông báo
+        String message = "Member \"" + memberName + "\" has completed the task \"" + taskTitle + "\".";
+
+        ProjectNotification notification = new ProjectNotification(
+                managerId,
+                taskId,
+                message
+        );
+
+        notification.setActionType("TASK_COMPLETED");
+        notification.setReferenceId(taskId); // Liên kết với task
+        notificationRepository.save(notification);
+    }
 }

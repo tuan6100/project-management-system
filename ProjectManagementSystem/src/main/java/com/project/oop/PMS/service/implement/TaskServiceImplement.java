@@ -231,7 +231,14 @@ public class TaskServiceImplement implements TaskService {
         } else {
             return; // Nếu member đã hoàn thành, không làm gì thêm
         }
-
+     // Gửi thông báo cho manager về thành viên hoàn thành task
+        
+        notificationService.notifyManagerTaskCompleted(
+              projectService.getManager(getTaskById(taskId).getProject().getProjectId()).getUserId(),
+                taskId,
+                task.getTitle(),
+               userRepository.findByUserId(memberId).getUsername()
+        );
         // Kiểm tra còn thành viên nào chưa hoàn thành không
         boolean hasPendingMembers = memberTaskRepository.existsByTaskAndIsCompleted(task, false);
         if (hasPendingMembers) {

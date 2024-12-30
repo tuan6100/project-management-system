@@ -23,7 +23,8 @@ import java.util.Map;
 @Service
 public class ProjectServiceImplement implements ProjectService {
 
-
+ @Autowired
+ private NotificationServiceImplement notificationService;
     @Autowired
     private ProjectRepository projectRepository;
 
@@ -156,7 +157,13 @@ public class ProjectServiceImplement implements ProjectService {
                 // Thêm thành viên mới với role là "member"
                 MemberProject memberProject = new MemberProject(user, getProjectById(projectId), "member");
                 memberProjectRepository.save(memberProject);
-
+                // Gọi NotificationService để gửi thông báo
+                notificationService.notifyManagerMemberAdded(
+                		managerId,
+                        projectId,
+                        getProjectById(projectId).getName(),
+                        userName
+                );
             } catch (Exception e) {
                 errors.add("Error with user " + userName + ": " + e.getMessage());
             }
