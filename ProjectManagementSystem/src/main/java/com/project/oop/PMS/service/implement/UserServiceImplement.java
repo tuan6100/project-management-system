@@ -91,5 +91,10 @@ public class UserServiceImplement implements UserService {
         tasks.forEach(task -> taskResponses.add(TaskResponse.fromEntity(task)));
         return taskResponses;
     }
+    @Override
+    public Integer getUserIdByUsername(String username) {
+        User user = userRepository.findByUserName(username);
+        return user != null ? user.getUserId() : null;
+    }
 
 }

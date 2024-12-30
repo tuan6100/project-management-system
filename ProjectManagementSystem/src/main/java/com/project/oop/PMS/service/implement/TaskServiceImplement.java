@@ -7,6 +7,7 @@ import com.project.oop.PMS.exception.CodeException;
 import com.project.oop.PMS.repository.MemberProjectRepository;
 import com.project.oop.PMS.repository.MemberTaskRepository;
 import com.project.oop.PMS.repository.TaskRepository;
+import com.project.oop.PMS.repository.UserRepository;
 import com.project.oop.PMS.service.NotificationService;
 import com.project.oop.PMS.service.TaskService;
 
@@ -15,8 +16,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class TaskServiceImplement implements TaskService {
@@ -29,6 +34,8 @@ public class TaskServiceImplement implements TaskService {
 
     @Autowired
     private MemberProjectRepository memberProjectRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     @Lazy
@@ -37,6 +44,7 @@ public class TaskServiceImplement implements TaskService {
     @Autowired
     @Lazy
     private UserServiceImplement userService;
+
     @Autowired
     private NotificationService notificationService;
 
@@ -180,5 +188,70 @@ public class TaskServiceImplement implements TaskService {
         List<Task> overdueTasks = taskRepository.findAllByDueDateBeforeAndIsOverdueNull(new Date());
         overdueTasks.forEach(task -> task.setIsOverdue(true));
         taskRepository.saveAll(overdueTasks);
+    }
+    public Map<String, Long> getCompletedTasksInLast7Days(Integer userId) {
+        Map<String, Long> result = new LinkedHashMap<>();
+
+        // Ngày hiện tại
+        LocalDate today = LocalDate.now();
+
+        // Duyệt từng ngày trong 7 ngày gần nhất
+        for (int i = 6; i >= 0; i--) {
+            LocalDate day = today.minusDays(i);
+            Date startDate = Date.from(day.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            Date endDate = Date.from(day.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+            Long count = taskRepository.countCompletedTasksByUserAndDateRange(userId, startDate, endDate);
+            result.put(day.toString(), count);
+        }
+
+        return result;
+    }
+    public void updateCompleteTask(Integer taskId, Integer memberId) throws CodeException {
+        // Lấy thông tin thành viên và task từ database
+        User member = userRepository.findByUserId(memberId);
+        Task task = taskRepository.findByTaskId(taskId);
+
+        // Kiểm tra xem thành viên có thuộc task này không
+        if (!isMemberOfTask(taskId, memberId)) {
+            throw new CodeException("Member not in this task");
+        }
+
+        // Tìm hoặc tạo mới MemberTask
+        MemberTask memberTask = memberTaskRepository.findByMemberAndTask(member, task);
+        if (memberTask == null) {
+            throw new CodeException("MemberTask không tồn tại!");
+        }
+
+        // Cập nhật trạng thái hoàn thành cho thành viên
+        if (!memberTask.getIs_completed()) {
+            memberTask.setIs_completed(true);
+            memberTask.setCompletedDate(new Date()); // Ghi thời gian hoàn thành
+            memberTaskRepository.saveAndFlush(memberTask); // Lưu và flush
+        } else {
+            return; // Nếu member đã hoàn thành, không làm gì thêm
+        }
+
+        // Kiểm tra còn thành viên nào chưa hoàn thành không
+        boolean hasPendingMembers = memberTaskRepository.existsByTaskAndIsCompleted(task, false);
+        if (hasPendingMembers) {
+            return; // Nếu vẫn còn thành viên chưa hoàn thành, dừng lại
+        }
+
+        // Cập nhật trạng thái của task (nếu tất cả thành viên đã hoàn thành)
+        Date now = new Date();
+        task.setStatus(Task.TaskStatus.completed);
+        task.setCompleteDate(now); // Ghi thời gian hoàn thành của task
+        task.setIsOverdue(task.getDueDate().before(now)); // Kiểm tra trạng thái overdue
+        taskRepository.saveAndFlush(task); // Lưu và flush trạng thái của task
+    }
+    public boolean isMemberOfTask(Integer taskId, int memberId) {
+        List<MemberTask> members = memberTaskRepository.findMemberTaskByTaskId(taskId);
+        for(MemberTask memberTask : members) {
+            if(memberTask.getMember().getUserId().equals(memberId)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -24,8 +24,10 @@ public class TaskController {
 
     @Autowired
     private TaskServiceImplement taskService;
+
     @Autowired
     private ProjectServiceImplement projectService;
+
     @Autowired
     private ProjectServiceImplementTrung projectServiceTrung;
 
@@ -81,7 +83,7 @@ public class TaskController {
             @PathVariable Integer taskId,
             @PathVariable Integer memberId) {
         try {
-            projectServiceTrung.updateCompleteTask(taskId, memberId);
+            taskService.updateCompleteTask(taskId, memberId);
             return ResponseEntity.ok("Update completed successfully");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to update task completion: " + e.getMessage());

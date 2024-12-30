@@ -15,4 +15,15 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
     List<Task> findAllByProjectId(@Param("projectId") Integer projectId);
     Task findByTaskId(Integer taskId);
     List<Task> findAllByDueDateBeforeAndIsOverdueNull(Date currentDate);
+    @Query("SELECT COUNT(t) FROM Task t " +
+    	       "JOIN t.memberTasks mt " +
+    	       "WHERE mt.member.userId = :userId " +
+    	       "AND t.completeDate >= :startDate " +
+    	       "AND t.completeDate < :endDate " +
+    	       "AND t.status = 'completed'")
+    	Long countCompletedTasksByUserAndDateRange(
+    	        @Param("userId") Integer userId,
+    	        @Param("startDate") Date startDate,
+    	        @Param("endDate") Date endDate);
+
 }

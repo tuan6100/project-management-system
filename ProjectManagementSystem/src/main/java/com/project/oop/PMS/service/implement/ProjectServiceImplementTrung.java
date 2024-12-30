@@ -25,7 +25,6 @@ import java.util.Map;
 @Service
 public class ProjectServiceImplementTrung implements ProjectService {
 
-
     @Autowired
     private ProjectRepository projectRepository;
 
@@ -42,10 +41,13 @@ public class ProjectServiceImplementTrung implements ProjectService {
     @Autowired
     @Lazy
     private TaskServiceImplement taskService;
+
     @Autowired
     private MemberTaskRepository memberTaskRepository;
+
     @Autowired
     private UserRepository userRepository;
+
 
     @Override
     public Project createProject(ProjectRequest projectRequest, Integer userId) throws CodeException {
@@ -113,7 +115,6 @@ public class ProjectServiceImplementTrung implements ProjectService {
                 progress            // Tiến độ dự án
         );
     }
-
 
 
     public User getManager(Integer projectId) {

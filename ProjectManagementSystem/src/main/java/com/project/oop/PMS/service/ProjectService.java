@@ -28,8 +28,6 @@ public interface ProjectService {
 	 public List<TaskResponse> getTasksInProject(Integer projectId) throws CodeException;
 	 public List<GetAllMemberForProjectResponse> getMembers(Integer projectId);
 
-
-
 	 public ProjectResponse getProjectResponse(Project project);
 	 public List<RateReport> rateCompleteTaskByProjectOfUser(Integer projectId) throws CodeException;
 	 public List<TaskResponseForGetAll> OverdueTask(Integer projectId) throws CodeException;

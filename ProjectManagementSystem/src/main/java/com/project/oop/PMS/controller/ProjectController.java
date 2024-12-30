@@ -27,7 +27,6 @@ import java.util.Map;
 @RequestMapping("/api/projects")
 public class ProjectController {
 
-
     @Qualifier("projectServiceImplement")
     @Autowired
     private ProjectService projectService = new ProjectServiceImplement();
@@ -37,6 +36,7 @@ public class ProjectController {
 
     @Autowired
     private ProjectServiceImplementTrung projectServiceTrung;
+
 
     @PostMapping("/add/{managerId}")
     public ResponseEntity<String> addProject(@RequestBody ProjectRequest request, @PathVariable Integer managerId) throws CodeException {
@@ -55,13 +55,6 @@ public class ProjectController {
     public ResponseEntity<List<GetAllMemberForProjectResponse>> getProjectMembers(@PathVariable Integer projectId, @PathVariable Integer userId) throws CodeException {
         User user = userService.getUserById(userId);
         Project project = projectService.getProjectById(projectId);
-//        boolean isMember = projectService.isMemberOfProject(user, project);
-//        if (isMember) {
-//            List<GetAllMemberForProjectResponse> memberProjects = projectService.getMembers(projectId);
-//            return ResponseEntity.ok(memberProjects);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
         List<GetAllMemberForProjectResponse> memberProjects = projectService.getMembers(userId, projectId);
         if (memberProjects == null) {
             return ResponseEntity.notFound().build();
@@ -79,14 +72,23 @@ public class ProjectController {
         return ResponseEntity.ok(updatedMembers);
     }
 
-    @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberId}")
+    @DeleteMapping("/{projectId}/member/remove/{managerId}/{memberName}")
     public ResponseEntity<String> removeMemberFromProject(@PathVariable Integer projectId,
-                                                           @PathVariable Integer managerId,
-                                                           @PathVariable Integer memberId
-                                                           ) throws CodeException {
+                                                          @PathVariable Integer managerId,
+                                                          @PathVariable String memberName) throws CodeException {
+        // Tìm memberId dựa trên memberName
+        Integer memberId = userService.getUserIdByUsername(memberName);
+        if (memberId == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Member with name " + memberName + " not found");
+        }
+
+        // Gọi hàm removeMember với memberId
         projectService.removeMember(projectId, managerId, memberId);
-        return ResponseEntity.ok("Member " +  userService.getUserById(memberId).getUsername() + " removed successfully");
+
+        // Trả về phản hồi thành công
+        return ResponseEntity.ok("Member " + memberName + " removed successfully");
     }
+
 
     @PutMapping("/{projectId}")
     public ResponseEntity<?> updateProject(@PathVariable Integer projectId, @RequestParam Integer userId, @RequestBody ProjectRequest projectRequest) throws CodeException {
@@ -106,25 +108,18 @@ public class ProjectController {
         projectService.deleteProject(projectId, managerId);
         return ResponseEntity.ok(Map.of("message", "Project deleted successfully"));
     }
+
     @GetMapping("/{projectId}/report/{reportType}")
     public ResponseEntity<?> generateReport(
             @PathVariable Integer projectId,
             @PathVariable String reportType) {
         try {
-            Object reportResult;
-            switch (reportType.toLowerCase()) {
-                case "rate-complete-user":
-                    reportResult = projectService.rateCompleteTaskByProjectOfUser(projectId);
-                    break;
-                case "rate-complete-task":
-                    reportResult = projectService.getRateCompleteOfTask(projectId);
-                    break;
-                case "overdue-tasks":
-                    reportResult = projectService.OverdueTask(projectId);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid report type: " + reportType);
-            }
+            Object reportResult = switch (reportType.toLowerCase()) {
+                case "rate-complete-user" -> projectService.rateCompleteTaskByProjectOfUser(projectId);
+                case "rate-complete-task" -> projectService.getRateCompleteOfTask(projectId);
+                case "overdue-tasks" -> projectService.OverdueTask(projectId);
+                default -> throw new IllegalArgumentException("Invalid report type: " + reportType);
+            };
             return ResponseEntity.ok(reportResult);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

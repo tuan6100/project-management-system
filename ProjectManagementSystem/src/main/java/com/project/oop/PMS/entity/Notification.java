@@ -20,54 +20,45 @@ public  class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    protected Integer id;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    protected Integer userId;
 
     @Column(nullable = false)
-    private String message;
+    protected String message;
 
     @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    protected LocalDateTime createdAt = LocalDateTime.now();
 
     @Column(name = "is_read", nullable = false)
-    private Boolean isRead = false;
+    protected Boolean isRead = false;
 
     @Column(name = "action_status", nullable = false)
-    private String actionStatus = "PENDING"; // Default status
+    protected String actionStatus = "PENDING";
 
     @Column(name = "action_type")
-    private String actionType;
+    protected String actionType;
+
     @Column(name = "manager_id")
-    private Integer managerId;
+    protected Integer managerId;
 
     @Column(name = "reference_id")
-    private Integer referenceId;
+    protected Integer referenceId;
     
 
-    // Getters and Setters
-    public String getActionStatus() {
-        return actionStatus;
+    public Notification() {
     }
 
-    public void setActionStatus(String actionStatus) {
-        this.actionStatus = actionStatus;
+    public Notification(Integer userId, String message) {
+        this.userId = userId;
+        this.message = message;
     }
 
-    public String getActionType() {
-        return actionType;
-    }
-
-    public void setActionType(String actionType) {
+    public Notification(Integer userId, String message, String actionType, Integer referenceId) {
+        this.userId = userId;
+        this.message = message;
         this.actionType = actionType;
-    }
-
-    public Integer getReferenceId() {
-        return referenceId;
-    }
-
-    public void setReferenceId(Integer referenceId) {
         this.referenceId = referenceId;
     }
 }

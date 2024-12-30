@@ -36,7 +36,7 @@ public class NotificationServiceImplement implements NotificationService {
         Notification notification = new Notification();
         notification.setUserId(userId);
         notification.setReferenceId(projectId);
-        notification.setMessage(message);
+        notification.setMessage("You are invited to Project " + projectRepository.findByProjectId(projectId).getName());
         notification.setActionType("PROJECT_INVITATION");
         notification.setActionStatus("PENDING");
         notification.setManagerId(mangerId);
@@ -120,20 +120,16 @@ public class NotificationServiceImplement implements NotificationService {
         notificationRepository.save(notification);
     }
     @Override
-    public void notifyUpcomingTasks(Integer projectId, Integer managerId) throws CodeException {
+    public void notifyUpcomingTasks(Integer projectId, Integer managerId, int days) throws CodeException {
         // Lấy thông tin dự án
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new CodeException("Project not found"));
 
-        // Kiểm tra quyền của manager
-  //      if (!project.getManager().getUserId().equals(managerId)) {
-    //        throw new CodeException("You are not authorized to notify users for this project");
-    //    }
-
-        // Lấy danh sách task sắp đến hạn (còn 1 ngày hoặc ít hơn)
+        // Xác định khoảng thời gian
         Date now = new Date();
-        Date upcomingDate = new Date(now.getTime() + (24 * 60 * 60 * 1000 * 2)); // Thêm 1 ngày
+        Date upcomingDate = new Date(now.getTime() + (long) days * 24 * 60 * 60 * 1000);
 
+        // Lọc danh sách task sắp đến hạn (trong khoảng số ngày được chọn)
         List<Task> upcomingTasks = project.getTasks().stream()
                 .filter(task -> task.getDueDate() != null &&
                         !task.getDueDate().before(now) &&
@@ -141,7 +137,7 @@ public class NotificationServiceImplement implements NotificationService {
                 .toList();
 
         if (upcomingTasks.isEmpty()) {
-            throw new CodeException("No upcoming tasks found within 1 day for this project");
+            throw new CodeException("No upcoming tasks found within " + days + " days for this project");
         }
 
         // Gửi thông báo cho từng thành viên liên quan
@@ -162,4 +158,5 @@ public class NotificationServiceImplement implements NotificationService {
             }
         }
     }
+
 }
