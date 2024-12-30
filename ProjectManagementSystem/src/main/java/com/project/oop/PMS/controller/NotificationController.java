@@ -67,6 +67,16 @@ public class NotificationController {
             );
         }
     }
-
+    @DeleteMapping("/{notificationId}")
+    public ResponseEntity<?> deleteNotification(@PathVariable Integer notificationId) {
+        try {
+            notificationService.deleteNotification(notificationId);
+            return ResponseEntity.ok("Notification deleted successfully.");
+        } catch (CodeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ErrorResponse(e.getMessage())
+            );
+        }
+    }
 }
 
