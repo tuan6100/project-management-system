@@ -22,4 +22,5 @@ public interface NotificationService {
 	void notifyManagerMemberAdded(Integer managerId, Integer projectId, String projectName, String userName);
 	void notifyManagerTaskCompleted(Integer managerId, Integer taskId, String taskTitle, String memberName);
 	void deleteNotification(Integer notificationId) throws CodeException;
+	
 }

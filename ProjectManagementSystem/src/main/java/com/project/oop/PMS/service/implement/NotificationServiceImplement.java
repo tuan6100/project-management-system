@@ -188,4 +188,16 @@ public class NotificationServiceImplement implements NotificationService {
         notification.setReferenceId(taskId); // Liên kết với task
         notificationRepository.save(notification);
     }
+    @Override
+    public void deleteNotification(Integer notificationId) throws CodeException {
+        // Kiểm tra thông báo có tồn tại không
+        Notification notification = notificationRepository.findById(notificationId).orElse(null);
+        
+        if (notification == null) {
+            throw new CodeException("Notification not found with ID: " + notificationId);
+        }
+
+        // Xóa thông báo
+        notificationRepository.delete(notification);
+    }
 }
