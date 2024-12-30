@@ -45,20 +45,23 @@ public class UserServiceImplement implements UserService {
 
     @Override
     public User getUserByAuth(String username, String password) {
-        return userRepository.findByUserName(username);
+        return userRepository.findByUsernameAndPassword(username, password);
 
     }
 
     @Override
     public User register(String username, String password) throws CodeException {
-        if (getUserByAuth(username, password) != null) {
-            throw new CodeException ("Username already exist!");
+        // Kiểm tra username đã tồn tại
+        if (userRepository.findByUserName(username) != null) {
+            throw new CodeException("Username already exists!");
         }
+        // Tạo mới User
         User user = new User();
         user.setUsername(username);
         user.setPassword(password);
         return userRepository.save(user);
     }
+
 
     @Override
     public User login(String username, String password) throws CodeException {
@@ -66,6 +69,7 @@ public class UserServiceImplement implements UserService {
         if (user == null) {
             throw new CodeException("Invalid username or password");
         }
+        
         return user;
     }
 
